@@ -1,0 +1,239 @@
+\documentclass[sigconf]{acmart}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{RUMI: Roommate User-Mediated Interface\\for Coordinated Living}
+
+
+\author{Adriel Poon}
+\email{apoon@ufl.edu}
+\affiliation{%
+  \institution{}
+  \city{}
+  \state{}
+  \country{}
+}
+
+\author{Daniel Park}
+\email{daniel.park@ufl.edu}
+\affiliation{%
+  \institution{}
+  \city{}
+  \state{}
+  \country{}
+}
+
+\author{Gayatri Baskaran}
+\email{gayatri.baskaran@ufl.edu}
+\affiliation{%
+  \institution{}
+  \city{}
+  \state{}
+  \country{}
+}
+
+\author{Andy Tran}
+\email{aa.tran@ufl.edu}
+\affiliation{%
+  \institution{}
+  \city{}
+  \state{}
+  \country{}
+}
+
+\settopmatter{printacmref=false}
+
+
+\begin{document}
+
+\begin{abstract}
+Shared living environments require ongoing coordination of chores, schedules, and shared resources. Common methods to navigate such contracts often rely on messaging platforms or information artifacts such as whiteboards or verbal agreements. However, we assert that these tools provide limited structure for sustained accountability and instead suggest an interface in support of computer-supported cooperative work (CSCW).\\
+
+The findings of the interview indicate recurring inconsistencies in chore management, fragmented communication across platforms, and the hesitation to directly address unmet expectations. Rather than introducing a highly formal management system, we propose a lightweight mobile interface that centralizes shared responsibilities while preserving flexibility and user control.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+\subsection{Problem Overview}
+Shared living environments among undergraduate students are characterized by loosely structured coordination systems that rely heavily on informal communication and implicit expectations. Based on our user research, roommates primarily depend on fragmented tools such as iMessage, Instagram group chats, verbal agreements, and occasional physical artifacts like whiteboards or sticky notes. While these tools enable basic communication, they fail to provide consistent visibility, accountability, or structured coordination across shared responsibilities.
+
+A key breakdown identified across interviews is the lack of acknowledgment and follow-through in communication. Many participants described sending messages regarding chores, cleanliness, or household updates that were either ignored or not acted upon. This leads to one-sided effort, where more proactive individuals compensate for passive roommates. Additionally, the absence of a standardized system for task delegation results in ambiguous ownership of responsibilities, often defaulting to the ``if you see it, you do it'' approach, which is inconsistently applied and can lead to frustration.
+
+Another major issue stems from the asynchronous and physically distributed nature of student lifestyles. Many roommates spend most of their day outside the home, limiting opportunities for in-person coordination. As a result, communication becomes delayed, fragmented, or entirely absent. This is further compounded by differences in digital habits, where some roommates are highly responsive while others rarely engage with shared messages.
+
+Ultimately, the problem is not the absence of tools, but the lack of integration, visibility, and shared accountability across existing systems.
+
+\subsection{Importance \& Motivation}
+The importance of addressing roommate coordination extends beyond simple inconvenience, as these breakdowns directly impact daily living quality, interpersonal relationships, and overall student well-being. Poor communication and uneven task distribution contribute to avoidant conflict behaviors, where individuals choose to tolerate issues rather than address them directly. Over time, this leads to passive resentment, reduced trust, and disengagement within shared living environments.
+
+Our interviews highlight that even when roommates are generally satisfied, this satisfaction often depends on compatible personalities or pre-existing friendships rather than effective systems. In contrast, mismatched expectations or unfamiliar roommate pairings expose the fragility of current coordination methods. This indicates that existing solutions do not scale across diverse roommate dynamics, making them unreliable as general-purpose systems.
+
+From a broader perspective, shared housing is not a temporary or niche condition but a persistent and growing living arrangement among young adults. As described in the introduction, these environments function as low-structure cooperative systems that depend on distributed coordination artifacts. However, current technologies have not evolved to fully support this form of everyday collaboration.
+
+This motivates the need for a system that does not replace existing communication habits, but rather augments them by introducing structure, visibility, and accountability while preserving flexibility. The goal is to reduce friction in coordination without forcing users into rigid or unfamiliar workflows.
+
+\subsection{End-User Identification}
+Our intended end-users are undergraduate students residing in communities. The target population primarily consists of young adults, between the ages of 16 and 24, who are currently enrolled in a university and reside in an undergraduate community, including on-campus dormitories and off-campus apartments.
+
+We decided to categorize our main targeted end-users into these characteristics so that we can account for all the different types of young adults who would be in shared living spaces. By distinguishing users who are on-campus or off-campus, we are able to account for the different needs and potential problems that are faced by each group. Students in dormitories do not have to worry about certain tasks such as buying toilet paper, cleaning the restroom, or replacing the trash bags. In comparison, off-campus students may have to worry about tasks including buying household materials: toilet paper, trash bags, or other sanitary cleaning supplies, and worrying about electricity and water bills.
+
+
+\section{Vision of Solution}
+
+\subsection{Problems Addressed}
+Our solution directly targets four primary breakdowns identified in our research: lack of task ownership, unacknowledged communication, fragmented coordination tools, and limited awareness of roommate presence and availability. These issues collectively contribute to inconsistent household management and weakened interpersonal dynamics.
+
+Rather than treating these as isolated problems, our vision addresses them as interconnected failures within a shared coordination system. For example, poor communication is not just a messaging issue, but also a visibility and accountability issue. Similarly, chore imbalance is not simply a task management problem, but a lack of clear ownership and feedback.
+
+\subsection{Current Solutions}
+Existing solutions fall into two main categories: communication tools and task management systems. Communication tools such as iMessage, Instagram, and WhatsApp are widely adopted due to their convenience and familiarity. They enable quick interaction but lack structure, making it difficult to track responsibilities or ensure follow-through.
+
+Task management tools like Tody introduce structure through chore assignment and prioritization, but they often impose rigid workflows and can create negative user experiences through pressure-based or guilt-driven design. As noted in the current solutions analysis, these systems may increase awareness but do not necessarily improve cooperation or engagement.
+
+Additionally, many successful roommate systems rely on informal practices such as verbal agreements or ``if you see it, you do it'' philosophies. These work well in high-trust environments but break down when expectations are misaligned.
+
+Our vision recognizes that these systems are not inherently flawed. Instead, they lack integration and adaptability across different roommate dynamics.
+
+\subsection{Proposed Features}
+Our vision is to create a unified coordination layer that integrates seamlessly into users' existing habits while enhancing visibility and accountability. Rather than replacing messaging platforms, the system builds on them by introducing structured interaction points.
+
+The core of this vision is a centralized mobile interface that combines four key components: chore management, shared scheduling, roommate status awareness, and a lightweight communication layer. These features are intentionally designed to mirror familiar concepts such as calendars, group chats, and physical fridge boards, allowing users to naturally adopt the system without relearning new behaviors.
+
+Chore management introduces clear ownership and deadlines while maintaining flexibility through optional notifications and customizable responsibilities. The shared calendar enhances coordination around events such as guests, quiet hours, and shared activities. Roommate status provides contextual awareness of availability, enabling better timing for communication and interaction. The bulletin or ``fridge'' feature creates a low-pressure space for updates and shared information, mimicking real-world household practices.
+
+Importantly, the system avoids forcing strict workflows. Users can engage with as much or as little structure as they prefer, preserving the successful aspects of existing roommate systems while addressing their limitations.
+
+\subsection{Metrics for Success}
+Success will be measured through both behavioral and experiential improvements. Key metrics include increased task completion rates without repeated reminders, reduced instances of unacknowledged communication, and improved perceived fairness in chore distribution among roommates.
+
+Additionally, user satisfaction will be evaluated through qualitative feedback on ease of use, perceived usefulness, and impact on roommate relationships. Engagement metrics such as feature usage frequency and retention will indicate whether the system integrates effectively into daily routines.
+
+Finally, a critical measure of success is whether users choose to continue using the system over their previous methods. If users revert back to fragmented tools, it suggests the system failed to meaningfully augment their workflow. If adoption persists, it indicates that the solution successfully enhances existing practices without disrupting them.
+
+
+\section{Initial Design \& Prototype Evaluation}
+
+\subsection{Early Design Concepts}
+In our early design sketches, we wanted to mainly map out the different flows between the different windows. The main features we need to include are the to-do list, the main updates, the calendar, and the roomies window. In the first iteration of sketches (the top row), the main focus was establishing the type of aesthetic and core characteristics of the UI to be. We decided on focusing on round shapes, and making sure that we reduced the amount of rough edges, unless for instances where we used lines to establish grouping amongst the different elements.
+
+The main focus of these preliminary sketches were figuring out how the different windows connected with each other or what were possible areas where components were needed. In the second half of sketches (the bottom half of the screen), we decided to add a navigation bar on the bottom of the screen to account for how this is a mobile app. This was also to reduce the number of actions needed to get to the main home page. To reduce the actions, the back button for all of the main windows leads back to the home page. While the navigation bar includes the home page, user profile, settings, and updates windows so that we can optimize how many clicks are needed to navigate to desired actions.
+
+\subsection{Design Decisions \& Trade-offs}
+Our user research drove the majority of our design decisions. For example, during the planning phase, 58.3\% of interviewed students indicated that an instant messaging group chat was used for their roommate communication. So, RUMI was implemented as a mobile application. Similarly, over 70\% of participants expressed over 4 hours of daily screen time and the majority of their time being outside of the home. Customized notifications were also central in our design to align with users' existing digital habits and to ensure they are always up to date. To accomplish this goal, users are offered pre-set reminder time intervals (i.e 24 or 48 hours) before chore deadlines and specific fridge update notifications as well as the option to customize notifications even further.
+
+Other aspects of our user research revealed a wider range in user needs and preferences, leading to more complex trade-offs that were less straightforward to resolve. A key finding was the need to accommodate diverse roommate dynamics, reflected in the wide variety of roommate issues---spanning from chore distribution, pet peeves, missed updates, or even more severe tensions. One of our first trade-offs was deciding which of our many feature ideas should be prioritized. It was important that the app did not put too much cognitive load on the user with feature bloat \cite{kaufman1998}. After brainstorming and finding common themes between different issues, we settled on 4 distinct modules for the app---household task management, a shared calendar, a space for roommate updates, and roommate statuses. We also considered how to handle sensitive data such as location and availability for roommate status. By having a binary home or not home indicator, both friendly or awkward roommates could both benefit from the information while maintaining privacy.
+
+\subsection{Prototype Development}
+The prototype development process progressed from a low-fidelity to high-fidelity design. Our initial low-fidelity consisted of hand-drawn sketches and baseline wireframes (Appendix A). These early designs focused on core functionality such as chore delegation and the roommate shared calendar. During this phase, we also focused on visual themes while aspects like navigation were intentionally kept very simple.
+
+After validating our initial concepts, we transitioned to high-fidelity prototyping using Figma (Appendix C). Development began with the primary screens for each module (i.e to-do, updates, status), sub-feature screens and supporting popups were also developed. The selected layouts were inspired by various applications. For example, the calendar application followed the structure of Google Calendar, and the digital fridge drew inspiration from image collages on physical fridges (Appendix B). By incorporating aspects from familiar applications, our goal was to support a more clear and accessible user experience.
+
+Also at this stage, we incorporated more refined visual elements and improved the consistency between screens through coordinating typography and spacing. The interactive prototype allowed us to map interactions across key screens to simulate real user behavior. This prototype was also useful to evaluate usability aspects and identify improvements for the overall user experience.
+
+\subsection{Evaluation Methodology}
+For assessing RUMI's early prototypes, we conducted an informal usability test using a convenience sample who matched our target end users. Each session began with a brief introduction explaining that we were evaluating the interface of RUMI, and encouraged our users to think out loud. Participants were asked to complete four representative tasks using the Figma prototype: add a new chore and assign it to a roommate, check the status of a roommate, create a calendar event for guests coming over, and check the notifications in settings. These tasks were selected to reflect the primary pain points in our user interviews which were chore delegation, presence awareness, and communication.
+
+We conducted and observed each user testing session without intervening and noting any errors when using the prototype. After completing each task, participants were asked three open-ended questions: what confused them, did the symbols and icons afford the action they were expecting, and what they would change. We did not keep track of any quantitative metrics such as completion time, as our goal was to have an informal evaluation for targeting any design issues we may have in our early prototyping stages.
+
+Key findings showed that users had difficulty locating chore assignment flow, specifically with being able to edit the pre-existing tasks, since there was little room for error for clicking the edit button in comparison to pressing the task and viewing more details. Participants reacted positively to the roommate status feature, although were unsure about the points under the roommates. They questioned how they would know the importance of a task, or whether this would be a necessary feature. Participants showed concerns in regards to if the points system would cause drama or help settle roommate tensions in relation to chore related conflicts. To address this, we will make it an option inside of settings for users to enable or disable this feature.
+
+When we conduct user-testing for our final product, we will make sure to include more to keep track of quantitative measures in addition to qualitative measures. So that we can keep track of benchmarks such as how long it takes to complete a task.
+
+\subsection{Results \& Refinements}
+We synthesized findings from our user research and iteratively evaluated the prototype for potential refinements. User confusion surrounding the ``fridge'' concept was one of the early identified issues. Introducing more support elements such as an FAQ section and help icon within the interface provides guidance for new users which should improve the clarity of the concept. Initially, we considered updates or announcements as the name of this section. We settled on ``fridge'' because of its memorable nature and conceptual correlation with the digital fridge presented in the interface.
+
+We also improved the labelling and affordances across the interface. For example, we originally considered using icons to designate between the fridge view list view. By adding text labels, the ambiguity of the icons alone was reduced. We also added trash can or plus arrows more consistently to indicate new tasks/updates or to delete them. These icons, in this case alone, clearly afforded the subsequent interaction. For the chore split list, we redesigned the screen to use more concise distinct blocks rather than including the user profile image in each task block. This allows the user to quickly scan a greater number of tasks, placing more emphasis on deadlines and assignments instead. Across each page, we verified our design by Apple's typography standards, ensuring that all font size was above 11pt and was typically between 16--22 pts \cite{apple2023typography}.
+
+
+\section{Implementation}
+
+\subsection{System Architecture}
+RUMI follows a layered client-server architecture built on the Expo managed React Native framework. On the client side, the application uses a hybrid navigation pattern combining a bottom tab navigator for the four primary modules---Home, Updates, Settings, and Profile---with a native stack navigator for detail and modal screens such as task editing, calendar event creation, and roommate status views. This structure minimizes navigation depth while keeping all core features accessible within one or two taps from the dashboard.
+
+State management is handled through two React Context providers. An authentication context manages user identity and personalization, including per-user accent colors. A synchronization context manages the shared application state---tasks, roommate statuses, and calendar events---and coordinates real-time updates across clients via WebSocket connections. On the web platform, the sync context maintains a persistent WebSocket connection to an Express server, which broadcasts state changes to all connected clients. On native platforms, the application falls back to local sample data, as the WebSocket transport was scoped to web for the initial implementation.
+
+The server component is a lightweight Node.js process using Express for static file serving and the \texttt{ws} library for WebSocket communication. It maintains an in-memory representation of the shared household state and acts as a relay, rebroadcasting updates from any client to all other connected users.
+
+\subsection{Technologies Used}
+The application is built with Expo SDK 54 and React Native 0.81, targeting iOS, Android, and web from a single TypeScript codebase. Navigation is provided by React Navigation 7, using both \texttt{@react-navigation/bottom-tabs} and \texttt{@react-navigation/native-stack}. The UI is styled using React Native's built-in StyleSheet API with a centralized theme module that defines a consistent color palette, spacing scale, and border radius tokens. Icons are sourced from Ionicons via \texttt{@expo/vector-icons}.
+
+The backend uses Express 5 for HTTP serving and the \texttt{ws} library for WebSocket-based real-time synchronization. During development, \texttt{@expo/ngrok} provides tunneling so that teammates on different networks can connect to a locally hosted server. TypeScript is used throughout both client and server code.
+
+\subsection{Key Features Implemented}
+Four core modules were implemented, each corresponding to a primary coordination breakdown identified in our research.
+
+The \textbf{chore management} module allows users to create, assign, and track household tasks. Each task carries a title, assignee, weight (1--10 scale reflecting effort), deadline, and optional repeat frequency (weekly, biweekly, or monthly). Users can filter tasks by ownership and status, and tasks are displayed as accent-colored cards with completion checkboxes.
+
+The \textbf{shared calendar} provides a multi-day timeline view where roommates can create events with start and end times, all-day flags, and optional notes. Events are color-coded by creator, enabling quick visual identification of who scheduled what.
+
+The \textbf{roommate status} screen displays a grid of roommate cards showing home or away status with emoji indicators and speech bubble messages. This gives household members ambient awareness of who is around and their availability.
+
+The \textbf{fridge} (bulletin board) implements a draggable note interface inspired by physical refrigerator boards. Notes support an importance flag, author attribution, and emoji reactions. Users can toggle between a spatial fridge layout and a conventional list view.
+
+\subsection{Deployment \& Usage}
+The project is available as a public repository. To run the application locally, users clone the repository and install dependencies with \texttt{npm install} from the \texttt{app-src} directory. The Expo development server is started with \texttt{npm start}, which supports launching on iOS Simulator, Android Emulator, or a web browser. For multi-user synchronization on web, the Express server is started with \texttt{npm run serve}, hosting the application at \texttt{localhost:3000}. Remote access for teammates is supported through ngrok tunneling.
+
+\subsection{Limitations \& Known Issues}
+The current implementation operates at a prototype level with several known constraints. Most significantly, all application data is stored in-memory on the server with no persistent database. Restarting the server resets all tasks, events, and statuses to their sample defaults. Authentication is demo-only, supporting four hardcoded user accounts rather than a real registration or login system.
+
+Real-time synchronization is only functional on the web platform. On native iOS and Android, the application loads local sample data and does not connect to the WebSocket server. Error handling around WebSocket disconnections uses empty catch blocks, meaning sync failures are silently dropped rather than surfaced to the user. Additionally, profile statistics displayed on the user profile screen are hardcoded rather than computed from live data. No automated tests exist in the codebase.
+
+
+\section{Reflection}
+
+\subsection{Challenges Faced}
+
+\subsubsection{Design Challenges}
+The biggest design challenge we faced was creating a high-density functionality app with streamlined user flows. Because the core features of our application stems from multiple platforms being implemented into one place, we faced significant UI friction regarding component interaction.
+
+For example, in the to-do list pages, we encountered a functional overlap where we needed to allow post-publish editing to mitigate user error without interfering with the primary ``view details'' overlay. We resolved this by implementing a distinct edit state which is indicated by an action icon within the task component, separating the read-only and edit-only functions of each task.
+
+In addition, implementing the calendar page was challenging in information architecture. While conceptually the calendar is simple, rendering a high-fidelity interface that remains functional and readable across different views including monthly, daily, weekly, or even every 3 days is complex.
+
+To optimize the time we have, we decided to implement a 3-day rolling view for our high-fidelity prototype. This hybrid approach allowed us to validate the logic for event-handling and state transitions in reference to adding and editing events. We had to also ensure that the interface remained uncluttered with this view while ensuring that the necessary information was shown clearly and neatly.
+
+\subsubsection{Technical Challenges}
+The primary technical challenge was implementing real-time state synchronization across multiple clients. Because RUMI is designed for shared use within a household, any action taken by one roommate---completing a task, updating a status, or posting a fridge note---needs to be reflected on every other connected device. We implemented this using WebSockets with a broadcast relay pattern on the server, where each incoming state update is forwarded to all other connected clients. Managing reconnection logic and ensuring state consistency after a client temporarily disconnects required careful handling of the sync lifecycle, including automatic reconnect with a three-second retry interval.
+
+Another challenge was maintaining a single codebase across three platforms. While Expo abstracts most platform differences, the WebSocket synchronization layer behaves differently on web versus native environments. On web, the browser's native WebSocket API integrates smoothly, but on native platforms we encountered issues with establishing persistent connections during development. Rather than introducing a separate networking dependency, we scoped real-time sync to the web build and used local data on native as a fallback. This was a pragmatic trade-off given the project timeline, though it limits the native experience to a single-user demo.
+
+Finally, building the draggable fridge note interface required working directly with React Native's PanResponder API to track touch gestures and update note positions in real time. Coordinating gesture state with the sync context---so that a note dragged on one client would appear in the updated position on another---introduced complexity around debouncing position updates to avoid flooding the WebSocket connection with high-frequency messages.
+
+\subsection{Lessons Learned}
+Throughout this process, iterative prototyping proved to be very useful when refining the design to be more user-centered. By continuously gaining feedback from one another or simple user tests, it allowed us to stay grounded in real user needs rather than relying on assumptions. We also learned that beginning with low-fidelity prototypes allowed us to brainstorm through many different design directions in a time effective and straightforward manner. It was much easier to explore diverse ideas and proactively identify flaws early in the design process. The transition to the high-fidelity via Figma was much more effective since the focus became consistency and minor design tweaks. We also recognized the value of clear labeling and strong affordances. Even small design decisions like icon choice or specific wording had a significant impact on how easily users could navigate and accomplish their goals.
+
+\subsection{Remaining Challenges \& Work}
+Although multiple iterations led to new refinements, some challenges still need to be addressed. One key aspect is balancing flexibility and simplicity. We currently support multiple customizable configurations, and have some more ideas for adding new options as well. However, there is the risk of complicating the user interface and increasing the user's cognitive load. For next steps, we are also considering expanding upon existing functionality through features like temporary status updates or more dynamic interaction through the digital fridge via images/gifs. Another goal is to further evaluate the design with a large and more diverse set of users for testing. This will allow us to validate the design more rigorously. These deeper insights into varying user behaviors will aid in identifying edge cases or work towards future iterations of the design.
+
+
+\section{Conclusion}
+% TODO
+
+
+\section*{Appendix}
+
+\subsection*{Appendix A -- Initial Sketches and Wireframes}
+% TODO: figures
+
+\subsection*{Appendix B -- Design Inspiration}
+% TODO: figures
+
+\subsection*{Appendix C -- High Fidelity Prototype (Figma)}
+% TODO: figures
+
+
+\bibliographystyle{ACM-Reference-Format}
+
+\begin{thebibliography}{}
+
+\bibitem{kaufman1998}
+Leah Kaufman and Brad Weed. 1998. Too much of a good thing? \textit{ACM SIGCHI Bulletin} 30, 4 (October 1998), 46--47. DOI:\url{http://dx.doi.org/10.1145/310307.310370}
+
+\bibitem{apple2023typography}
+Apple Inc. 2023. Typography. \textit{Human Interface Guidelines}. Retrieved April 3, 2026 from \url{https://developer.apple.com/design/human-interface-guidelines/typography}
+
+\end{thebibliography}
+
+\end{document}
