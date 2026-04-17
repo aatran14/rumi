@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     q: 'What are task weights?',
-    a: 'Each chore has a weight from 1-10 points representing effort. This helps keep the workload balanced — you can see how many total points each roommate is carrying when assigning tasks.',
+    a: 'Each chore has a weight from 1–10 points representing effort. This helps keep the workload balanced — you can see how many total points each roommate is carrying when assigning tasks.',
   },
   {
     q: 'How does the Fridge work?',
@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: 'What does "Roomie Status" mean?',
-    a: 'It shows whether each roommate is Home or Away, along with a custom status bubble so everyone knows if you\'re available to hang or need quiet time.',
+    a: "It shows whether each roommate is Home or Away, along with a custom status bubble so everyone knows if you're available to hang or need quiet time.",
   },
   {
     q: 'How do recurring tasks work?',
@@ -34,7 +34,7 @@ const FAQS = [
   },
   {
     q: 'Is my data private?',
-    a: 'Your data is only shared with the roommates in your home. We don\'t sell or share data with third parties.',
+    a: "Your data is only shared with the roommates in your home. We don't sell or share data with third parties.",
   },
 ];
 
@@ -44,45 +44,73 @@ export default function FAQScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <ScreenHeader title="FAQ" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content}>
-        {FAQS.map((faq, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.card}
-            onPress={() => setExpanded(expanded === i ? null : i)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.questionRow}>
-              <Text style={styles.question}>{faq.q}</Text>
-              <Ionicons
-                name={expanded === i ? 'chevron-up' : 'chevron-down'}
-                size={18}
-                color={colors.textMuted}
-              />
-            </View>
-            {expanded === i && (
-              <Text style={styles.answer}>{faq.a}</Text>
-            )}
-          </TouchableOpacity>
-        ))}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {FAQS.map((faq, i) => {
+          const open = expanded === i;
+          return (
+            <TouchableOpacity
+              key={i}
+              style={[styles.card, open && styles.cardOpen]}
+              onPress={() => setExpanded(open ? null : i)}
+              activeOpacity={0.75}
+            >
+              <View style={styles.questionRow}>
+                <Text style={styles.question}>{faq.q}</Text>
+                <Ionicons
+                  name={open ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  color={open ? colors.accent : colors.textMuted}
+                />
+              </View>
+              {open && (
+                <Text style={styles.answer}>{faq.a}</Text>
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: 64 },
-  content: { paddingHorizontal: spacing.lg, paddingBottom: 100, gap: spacing.sm },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 56 },
+  content: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100,
+    gap: spacing.sm,
+  },
   card: {
-    backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 15,
+  },
+  cardOpen: {
+    borderColor: colors.accentBorder,
   },
   questionRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
   },
   question: {
-    color: colors.white, fontSize: 15, fontWeight: '600', flex: 1, marginRight: 8,
+    flex: 1,
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '500',
+    lineHeight: 22,
   },
   answer: {
-    color: colors.textSecondary, fontSize: 14, lineHeight: 20, marginTop: spacing.sm,
+    color: colors.textSecondary,
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
 });

@@ -25,21 +25,19 @@ export function useSyncContext() {
 
 function getServerUrl(): string | null {
   if (Platform.OS === 'web') {
-    // On web, connect to the same host that served the page
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${window.location.host}/ws`;
   }
-  // On native, you'd configure this to your server URL
   return null;
 }
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
-  const [tasks, setTasksLocal] = useState<Task[]>(SAMPLE_TASKS);
+  const [tasks,     setTasksLocal]     = useState<Task[]>(SAMPLE_TASKS);
   const [roommates, setRoommatesLocal] = useState<Roommate[]>(SAMPLE_ROOMMATES);
-  const [events, setEventsLocal] = useState<CalendarEvent[]>(SAMPLE_EVENTS);
-  const [connected, setConnected] = useState(false);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [events,    setEventsLocal]    = useState<CalendarEvent[]>(SAMPLE_EVENTS);
+  const [connected, setConnected]      = useState(false);
+  const wsRef           = useRef<WebSocket | null>(null);
+  const reconnectTimer  = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const send = useCallback((msg: SyncMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -50,70 +48,34 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   const connect = useCallback(() => {
     const url = getServerUrl();
     if (!url) return;
-
     try {
       const ws = new WebSocket(url);
       wsRef.current = ws;
-
-      ws.onopen = () => {
-        setConnected(true);
-        send({ type: 'request_sync' });
-      };
-
+      ws.onopen = () => { setConnected(true); send({ type: 'request_sync' }); };
       ws.onmessage = (e) => {
         try {
           const msg: SyncMessage = JSON.parse(e.data);
           switch (msg.type) {
-            case 'sync':
-              setTasksLocal(msg.state.tasks);
-              setRoommatesLocal(msg.state.roommates);
-              setEventsLocal(msg.state.events);
-              break;
-            case 'update_tasks':
-              setTasksLocal(msg.tasks);
-              break;
-            case 'update_roommates':
-              setRoommatesLocal(msg.roommates);
-              break;
-            case 'update_events':
-              setEventsLocal(msg.events);
-              break;
+            case 'sync':            setTasksLocal(msg.state.tasks); setRoommatesLocal(msg.state.roommates); setEventsLocal(msg.state.events); break;
+            case 'update_tasks':    setTasksLocal(msg.tasks);     break;
+            case 'update_roommates':setRoommatesLocal(msg.roommates); break;
+            case 'update_events':   setEventsLocal(msg.events);   break;
           }
         } catch {}
       };
-
-      ws.onclose = () => {
-        setConnected(false);
-        wsRef.current = null;
-        reconnectTimer.current = setTimeout(connect, 3000);
-      };
-
+      ws.onclose = () => { setConnected(false); wsRef.current = null; reconnectTimer.current = setTimeout(connect, 3000); };
       ws.onerror = () => ws.close();
     } catch {}
   }, [send]);
 
   useEffect(() => {
     connect();
-    return () => {
-      clearTimeout(reconnectTimer.current);
-      wsRef.current?.close();
-    };
+    return () => { clearTimeout(reconnectTimer.current); wsRef.current?.close(); };
   }, [connect]);
 
-  const setTasks = useCallback((newTasks: Task[]) => {
-    setTasksLocal(newTasks);
-    send({ type: 'update_tasks', tasks: newTasks });
-  }, [send]);
-
-  const setRoommates = useCallback((newRoommates: Roommate[]) => {
-    setRoommatesLocal(newRoommates);
-    send({ type: 'update_roommates', roommates: newRoommates });
-  }, [send]);
-
-  const setEvents = useCallback((newEvents: CalendarEvent[]) => {
-    setEventsLocal(newEvents);
-    send({ type: 'update_events', events: newEvents });
-  }, [send]);
+  const setTasks     = useCallback((t: Task[])      => { setTasksLocal(t);     send({ type: 'update_tasks',     tasks: t });     }, [send]);
+  const setRoommates = useCallback((r: Roommate[])  => { setRoommatesLocal(r); send({ type: 'update_roommates', roommates: r }); }, [send]);
+  const setEvents    = useCallback((e: CalendarEvent[]) => { setEventsLocal(e); send({ type: 'update_events',   events: e });    }, [send]);
 
   return (
     <SyncContext.Provider value={{ tasks, roommates, events, setTasks, setRoommates, setEvents, connected }}>

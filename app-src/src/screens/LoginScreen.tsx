@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { colors, spacing, radius } from '../theme';
@@ -35,7 +30,7 @@ export default function LoginScreen({ navigation }: Props) {
       signIn(key);
       navigation.replace('MainTabs');
     } else {
-      setError('Invalid username or password');
+      setError('Invalid username or password.');
     }
   };
 
@@ -46,51 +41,56 @@ export default function LoginScreen({ navigation }: Props) {
     >
       <StatusBar style="light" />
 
-      <Text style={styles.title}>Rumi</Text>
-
-      {/* Username */}
-      <View style={styles.fieldRow}>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholderTextColor={colors.textMuted}
-        />
+      <View style={styles.header}>
+        <Text style={styles.wordmark}>Rumi</Text>
+        <Text style={styles.subtitle}>Welcome back</Text>
       </View>
 
-      {/* Password */}
-      <View style={styles.fieldRow}>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor={colors.textMuted}
-        />
+      <View style={styles.form}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            style={[styles.input, error ? styles.inputError : null]}
+            value={username}
+            onChangeText={(t) => { setUsername(t); setError(''); }}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholderTextColor={colors.textMuted}
+            placeholder="your username"
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={[styles.input, error ? styles.inputError : null]}
+            value={password}
+            onChangeText={(t) => { setPassword(t); setError(''); }}
+            secureTextEntry
+            placeholderTextColor={colors.textMuted}
+            placeholder="••••••••"
+          />
+        </View>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <TouchableOpacity
+          style={styles.primaryBtn}
+          onPress={handleSignIn}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.primaryBtnText}>Sign in</Text>
+        </TouchableOpacity>
       </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      {/* Sign In */}
-      <TouchableOpacity
-        style={styles.primaryButton}
-        onPress={handleSignIn}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.primaryButtonText}>Sign in</Text>
-      </TouchableOpacity>
-
-      {/* Link to Sign Up */}
       <TouchableOpacity
         onPress={() => navigation.navigate('SignUp')}
-        style={styles.linkWrap}
+        style={styles.footer}
+        activeOpacity={0.7}
       >
-        <Text style={styles.linkText}>
-          Don't have an account? <Text style={styles.linkBold}>Sign up</Text>
+        <Text style={styles.footerText}>
+          Don't have an account?{' '}
+          <Text style={styles.footerLink}>Sign up</Text>
         </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
@@ -104,67 +104,78 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 72,
-    color: colors.white,
+  header: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  wordmark: {
+    fontSize: 64,
+    color: colors.textPrimary,
     fontStyle: 'italic',
     fontFamily: 'serif',
     letterSpacing: 2,
-    textAlign: 'center',
-    marginBottom: 60,
+    marginBottom: 8,
   },
-  fieldRow: {
-    marginBottom: spacing.lg,
+  subtitle: {
+    fontSize: 15,
+    color: colors.textMuted,
+    letterSpacing: 0.3,
+  },
+  form: {
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  field: {
+    gap: 6,
   },
   label: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 6,
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginLeft: 2,
   },
   input: {
-    flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
-    color: colors.white,
+    color: colors.textPrimary,
     fontSize: 16,
   },
-  error: {
-    color: colors.red,
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: spacing.sm,
+  inputError: {
+    borderColor: colors.danger,
+    borderWidth: 1,
   },
-  primaryButton: {
-    backgroundColor: colors.accentLight,
-    borderRadius: 28,
+  errorText: {
+    color: colors.danger,
+    fontSize: 13,
+    marginTop: -4,
+  },
+  primaryBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.pill,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: spacing.xl,
-    marginHorizontal: spacing.xl,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 6,
+    marginTop: spacing.sm,
   },
-  primaryButtonText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: '700',
+  primaryBtnText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
-  linkWrap: {
-    marginTop: spacing.lg,
+  footer: {
     alignItems: 'center',
+    paddingVertical: spacing.md,
   },
-  linkText: {
-    color: colors.textSecondary,
+  footerText: {
+    color: colors.textMuted,
     fontSize: 14,
   },
-  linkBold: {
-    color: colors.accentLight,
-    fontWeight: '600',
+  footerLink: {
+    color: colors.accentSoft,
+    fontWeight: '500',
   },
 });

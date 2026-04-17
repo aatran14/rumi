@@ -1,15 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  FlatList,
-  Platform,
-  Alert,
-  Pressable,
-  Modal,
+  View, Text, TouchableOpacity, StyleSheet,
+  ScrollView, FlatList, Platform, Alert, Pressable, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { StackScreenNavigation, Task } from '../types';
@@ -27,20 +19,16 @@ export default function ToDoScreen({ navigation }: Props) {
   const [activeFilter, setActiveFilter] = useState('all');
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
 
-  // Filter tasks
   const filteredTasks = useMemo(() => {
     let list = tasks;
-
-    // Mine vs Everyone
     if (tab === 'Mine' && user) {
       list = list.filter(
-        (t) => t.assignee.toLowerCase() === user.displayName.toLowerCase()
-          || t.assignee.toLowerCase() === user.username.toLowerCase()
-          || t.assignee === 'You',
+        (t) =>
+          t.assignee.toLowerCase() === user.displayName.toLowerCase() ||
+          t.assignee.toLowerCase() === user.username.toLowerCase() ||
+          t.assignee === 'You',
       );
     }
-
-    // Filter chips
     switch (activeFilter) {
       case 'today':
         list = list.filter((t) => {
@@ -48,46 +36,23 @@ export default function ToDoScreen({ navigation }: Props) {
           return due.includes('today') || due.includes(new Date().toLocaleDateString());
         });
         break;
-      case 'archived':
-        list = list.filter((t) => t.done);
-        break;
-      case 'in progress':
-        list = list.filter((t) => !t.done);
-        break;
-      // 'all' shows everything
+      case 'archived': list = list.filter((t) => t.done); break;
+      case 'in progress': list = list.filter((t) => !t.done); break;
     }
-
     return list;
   }, [tasks, tab, activeFilter, user]);
 
-  const toggleTask = (id: string) => {
+  const toggleTask = (id: string) =>
     setTasks(tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-  };
 
   const archiveTask = (id: string) => {
     setTasks(tasks.filter((t) => t.id !== id));
     setViewingTask(null);
   };
 
-  const clearDone = () => {
-    if (Platform.OS === 'web') {
-      if (window.confirm('Delete all completed tasks?')) {
-        setTasks(tasks.filter((t) => !t.done));
-      }
-    } else {
-      Alert.alert('Clear Done', 'Delete all completed tasks?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: () => setTasks(tasks.filter((t) => !t.done)) },
-      ]);
-    }
-  };
-
   const dueLabel = (task: Task) => task.due ?? task.deadlineDate ?? '';
-
-  const repeatLabel = (task: Task) => {
-    if (!task.repeat) return null;
-    return task.repeatFrequency ?? 'Repeating';
-  };
+  const repeatLabel = (task: Task) =>
+    task.repeat ? (task.repeatFrequency ?? 'Repeating') : null;
 
   return (
     <View style={styles.container}>
@@ -98,27 +63,29 @@ export default function ToDoScreen({ navigation }: Props) {
           style={styles.headerBtn}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <Ionicons name="chevron-back" size={26} color={colors.white} />
+          <Ionicons name="chevron-back" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>To-Do</Text>
         <TouchableOpacity
           style={[styles.headerBtn, styles.addBtn]}
           onPress={() => navigation.navigate('AddTask')}
         >
-          <Ionicons name="add" size={22} color={colors.white} />
+          <Ionicons name="add" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
-      {/* Mine / Everyone toggle */}
-      <View style={styles.tabRow}>
+      {/* Mine / Everyone segment */}
+      <View style={styles.segmentRow}>
         {(['Mine', 'Everyone'] as const).map((t) => (
           <TouchableOpacity
             key={t}
-            style={[styles.tab, tab === t && styles.tabActive]}
+            style={[styles.segment, tab === t && styles.segmentActive]}
             onPress={() => setTab(t)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>{t}</Text>
+            <Text style={[styles.segmentText, tab === t && styles.segmentTextActive]}>
+              {t}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -127,16 +94,16 @@ export default function ToDoScreen({ navigation }: Props) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.filterRow}
+        style={styles.filterScroll}
         contentContainerStyle={styles.filterContent}
       >
         {TASK_FILTERS.map((f) => (
           <TouchableOpacity
             key={f}
-            style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}
+            style={[styles.chip, activeFilter === f && styles.chipActive]}
             onPress={() => setActiveFilter(f)}
           >
-            <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>
+            <Text style={[styles.chipText, activeFilter === f && styles.chipTextActive]}>
               {f}
             </Text>
           </TouchableOpacity>
@@ -147,11 +114,12 @@ export default function ToDoScreen({ navigation }: Props) {
       <FlatList
         data={filteredTasks}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="clipboard-outline" size={40} color={colors.textMuted} />
-            <Text style={styles.emptyText}>No tasks yet</Text>
+          <View style={styles.empty}>
+            <Ionicons name="checkbox-outline" size={40} color={colors.textMuted} />
+            <Text style={styles.emptyText}>No tasks here</Text>
+            <Text style={styles.emptyHint}>Add one with the + button above.</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -165,35 +133,46 @@ export default function ToDoScreen({ navigation }: Props) {
             >
               <Ionicons
                 name={item.done ? 'checkbox' : 'square-outline'}
-                size={26}
-                color={item.done ? colors.green : 'rgba(255,255,255,0.4)'}
+                size={24}
+                color={item.done ? colors.success : colors.textMuted}
               />
             </Pressable>
-            <View style={styles.taskContent}>
+
+            <View style={styles.taskBody}>
               <Text style={[styles.taskTitle, item.done && styles.taskTitleDone]}>
                 {item.title}
               </Text>
               <View style={styles.taskMeta}>
-                <View style={styles.assigneeBadge}>
-                  <Text style={styles.assigneeText}>{item.assignee}</Text>
+                <View style={[styles.badge, styles.assigneeBadge]}>
+                  <Text style={styles.badgeText}>{item.assignee}</Text>
                 </View>
-                <View style={styles.dueBadge}>
-                  <Ionicons name="time-outline" size={12} color={colors.orange} />
-                  <Text style={styles.dueText}>{dueLabel(item)}</Text>
-                </View>
+                {dueLabel(item) ? (
+                  <View style={styles.duePill}>
+                    <Ionicons name="time-outline" size={11} color={colors.warning} />
+                    <Text style={styles.dueText}>{dueLabel(item)}</Text>
+                  </View>
+                ) : null}
+                {repeatLabel(item) ? (
+                  <View style={styles.repeatPill}>
+                    <Ionicons name="repeat" size={11} color={colors.accent} />
+                    <Text style={styles.repeatText}>{repeatLabel(item)}</Text>
+                  </View>
+                ) : null}
               </View>
             </View>
+
             <TouchableOpacity
               onPress={() => navigation.navigate('EditTask', { taskId: item.id })}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.editBtn}
             >
-              <Ionicons name="ellipsis-horizontal" size={22} color="rgba(255,255,255,0.5)" />
+              <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
             </TouchableOpacity>
           </Pressable>
         )}
       />
 
-      {/* Task detail popup */}
+      {/* Task detail modal */}
       <Modal
         visible={!!viewingTask}
         transparent
@@ -202,81 +181,60 @@ export default function ToDoScreen({ navigation }: Props) {
       >
         <Pressable style={styles.overlay} onPress={() => setViewingTask(null)}>
           <Pressable style={styles.detailCard} onPress={(e) => e.stopPropagation()}>
-            {/* Close */}
             <TouchableOpacity
               style={styles.detailClose}
               onPress={() => setViewingTask(null)}
             >
-              <Ionicons name="close" size={22} color={colors.textMuted} />
+              <Ionicons name="close" size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
-            {/* Title */}
             <Text style={styles.detailTitle}>{viewingTask?.title}</Text>
 
-            {/* Status badge */}
-            <View style={[styles.detailStatusBadge, viewingTask?.done && styles.detailStatusDone]}>
-              <Ionicons
-                name={viewingTask?.done ? 'checkmark-circle' : 'time-outline'}
-                size={16}
-                color={viewingTask?.done ? colors.green : colors.orange}
-              />
-              <Text style={[styles.detailStatusText, viewingTask?.done && { color: colors.green }]}>
-                {viewingTask?.done ? 'Completed' : 'In Progress'}
+            <View
+              style={[
+                styles.statusBadge,
+                viewingTask?.done ? styles.statusDone : styles.statusPending,
+              ]}
+            >
+              <Text style={[styles.statusText, viewingTask?.done && styles.statusTextDone]}>
+                {viewingTask?.done ? 'Completed' : 'In progress'}
               </Text>
             </View>
 
-            {/* Details */}
             <View style={styles.detailRows}>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Assigned to</Text>
-                <Text style={styles.detailValue}>{viewingTask?.assignee}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Assigned by</Text>
-                <Text style={styles.detailValue}>
-                  {viewingTask?.assignee === 'You' ? 'Self-assigned' : 'Roommate'}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Deadline</Text>
-                <Text style={styles.detailValue}>
-                  {viewingTask ? dueLabel(viewingTask) : ''}
-                  {viewingTask?.deadlineTime ? ` at ${viewingTask.deadlineTime}` : ''}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Weight</Text>
-                <Text style={styles.detailValue}>
-                  {viewingTask?.weight ? `${viewingTask.weight} pts` : '-'}
-                </Text>
-              </View>
-              {viewingTask && repeatLabel(viewingTask) && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Repeats</Text>
-                  <Text style={styles.detailValue}>{repeatLabel(viewingTask)}</Text>
-                </View>
-              )}
+              {viewingTask && [
+                ['Assigned to', viewingTask.assignee],
+                ['Due', dueLabel(viewingTask)],
+                ['Weight', viewingTask.weight ? `${viewingTask.weight} pts` : null],
+                ['Repeats', repeatLabel(viewingTask)],
+              ]
+                .filter(([, v]) => v)
+                .map(([label, value]) => (
+                  <View key={label as string} style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>{label}</Text>
+                    <Text style={styles.detailValue}>{value}</Text>
+                  </View>
+                ))}
             </View>
 
-            {/* Actions */}
             <View style={styles.detailActions}>
               <TouchableOpacity
-                style={styles.detailEditBtn}
+                style={styles.editAction}
                 onPress={() => {
                   const id = viewingTask?.id;
                   setViewingTask(null);
                   if (id) navigation.navigate('EditTask', { taskId: id });
                 }}
               >
-                <Ionicons name="pencil" size={16} color={colors.white} />
-                <Text style={styles.detailEditText}>Edit</Text>
+                <Ionicons name="pencil-outline" size={16} color={colors.accent} />
+                <Text style={styles.editActionText}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.detailArchiveBtn}
+                style={styles.archiveAction}
                 onPress={() => viewingTask && archiveTask(viewingTask.id)}
               >
-                <Ionicons name="archive" size={16} color={colors.white} />
-                <Text style={styles.detailArchiveText}>Archive</Text>
+                <Ionicons name="archive-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.archiveActionText}>Archive</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -287,118 +245,211 @@ export default function ToDoScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: 64 },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 56 },
 
   // Header
   header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: spacing.lg, marginBottom: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+    marginBottom: spacing.md,
   },
   headerBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.surfaceLight, alignItems: 'center', justifyContent: 'center',
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceRaised,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  addBtn: { backgroundColor: colors.accent },
-  headerTitle: {
-    fontSize: 26, fontWeight: '700', color: colors.white,
-    flex: 1, textAlign: 'center', letterSpacing: 0.3,
-  },
-  headerRight: { flexDirection: 'row', gap: 8 },
-
-  // Tabs
-  tabRow: {
-    flexDirection: 'row', marginHorizontal: spacing.lg,
-    backgroundColor: colors.surface, borderRadius: radius.pill,
-    padding: 3, marginBottom: spacing.md,
-  },
-  tab: {
-    flex: 1, paddingVertical: 11, borderRadius: radius.pill, alignItems: 'center',
-  },
-  tabActive: {
+  addBtn: {
     backgroundColor: colors.accent,
-    shadowColor: colors.accent, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, shadowRadius: 8,
+    borderColor: colors.accent,
   },
-  tabText: { color: colors.textMuted, fontSize: 15, fontWeight: '600' },
-  tabTextActive: { color: colors.white },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
 
-  // Filters
-  filterRow: { maxHeight: 34, marginBottom: spacing.sm },
-  filterContent: {
-    paddingHorizontal: spacing.lg, gap: spacing.sm,
+  // Segment
+  segmentRow: {
+    flexDirection: 'row',
+    marginHorizontal: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: 3,
+    marginBottom: spacing.md,
+  },
+  segment: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: radius.sm,
     alignItems: 'center',
   },
-  filterChip: {
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
-    borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 6,
-    height: 32, justifyContent: 'center',
+  segmentActive: { backgroundColor: colors.accent },
+  segmentText: { color: colors.textMuted, fontSize: 14, fontWeight: '500' },
+  segmentTextActive: { color: colors.textPrimary, fontWeight: '600' },
+
+  // Filters
+  filterScroll: { maxHeight: 36, marginBottom: spacing.sm },
+  filterContent: {
+    paddingHorizontal: spacing.lg,
+    gap: 8,
+    alignItems: 'center',
   },
-  filterChipActive: { backgroundColor: colors.accentDim, borderColor: colors.accent },
-  filterText: { color: colors.textMuted, fontSize: 13, fontWeight: '500' },
-  filterTextActive: { color: colors.accentLight },
+  chip: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    height: 30,
+    justifyContent: 'center',
+  },
+  chipActive: { backgroundColor: colors.accentDim, borderColor: colors.accentBorder },
+  chipText: { color: colors.textMuted, fontSize: 13 },
+  chipTextActive: { color: colors.accentSoft, fontWeight: '500' },
 
   // List
-  listContent: { paddingHorizontal: spacing.lg, paddingBottom: 100, gap: spacing.sm },
-  emptyState: { alignItems: 'center', paddingTop: 60, gap: 12 },
-  emptyText: { color: colors.textMuted, fontSize: 16 },
+  list: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100,
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
+  },
+  empty: { alignItems: 'center', paddingTop: 64, gap: 10 },
+  emptyText: { color: colors.textSecondary, fontSize: 16, fontWeight: '500' },
+  emptyHint: { color: colors.textMuted, fontSize: 14 },
 
   // Task card
   taskCard: {
-    backgroundColor: colors.accent, borderRadius: radius.lg,
-    padding: spacing.md, flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
   },
-  taskCardDone: { backgroundColor: colors.surfaceLight, opacity: 0.8 },
-  taskContent: { flex: 1, gap: 6 },
-  taskTitle: { color: colors.white, fontSize: 17, fontWeight: '600' },
-  taskTitleDone: { textDecorationLine: 'line-through', color: colors.textSecondary },
-  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  assigneeBadge: {
-    backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: radius.sm,
-    paddingHorizontal: 8, paddingVertical: 2,
+  taskCardDone: { opacity: 0.55 },
+  taskBody: { flex: 1, gap: 6 },
+  taskTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '500', lineHeight: 22 },
+  taskTitleDone: { textDecorationLine: 'line-through', color: colors.textMuted },
+  taskMeta: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
+  badge: {
+    borderRadius: radius.xs,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
   },
-  assigneeText: { color: colors.textPrimary, fontSize: 12, fontWeight: '500' },
-  dueBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  dueText: { color: colors.orange, fontSize: 12, fontWeight: '500' },
+  assigneeBadge: { backgroundColor: colors.surfaceRaised },
+  badgeText: { color: colors.textSecondary, fontSize: 12, fontWeight: '500' },
+  duePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  dueText: { color: colors.warning, fontSize: 12 },
+  repeatPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  repeatText: { color: colors.accentSoft, fontSize: 12 },
+  editBtn: { paddingTop: 2 },
 
-  // Detail modal
+  // Modal
   overlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center', justifyContent: 'center',
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   detailCard: {
-    backgroundColor: colors.surface, borderRadius: 20,
-    padding: spacing.xl, width: '85%', maxWidth: 360, position: 'relative',
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    width: '85%',
+    maxWidth: 360,
   },
-  detailClose: { position: 'absolute', top: 12, right: 12, padding: 4, zIndex: 1 },
+  detailClose: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    padding: 4,
+    zIndex: 1,
+  },
   detailTitle: {
-    color: colors.white, fontSize: 22, fontWeight: '700',
-    marginBottom: spacing.sm, paddingRight: 30,
+    color: colors.textPrimary,
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+    paddingRight: 28,
+    lineHeight: 28,
   },
-  detailStatusBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(255,159,10,0.15)', borderRadius: radius.pill,
-    paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start',
-    marginBottom: spacing.lg,
+  statusBadge: {
+    borderRadius: radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    alignSelf: 'flex-start',
+    marginBottom: spacing.md,
   },
-  detailStatusDone: { backgroundColor: 'rgba(52,199,89,0.15)' },
-  detailStatusText: { color: colors.orange, fontSize: 13, fontWeight: '600' },
-  detailRows: { gap: spacing.sm, marginBottom: spacing.lg },
+  statusPending: { backgroundColor: 'rgba(255,159,10,0.12)', borderWidth: 1, borderColor: 'rgba(255,159,10,0.25)' },
+  statusDone:    { backgroundColor: 'rgba(52,199,89,0.12)',  borderWidth: 1, borderColor: 'rgba(52,199,89,0.25)' },
+  statusText: { color: colors.warning, fontSize: 13, fontWeight: '500' },
+  statusTextDone: { color: colors.success },
+  detailRows: { gap: 10, marginBottom: spacing.lg },
   detailRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 3,
   },
   detailLabel: { color: colors.textMuted, fontSize: 14 },
-  detailValue: { color: colors.white, fontSize: 14, fontWeight: '600' },
-  detailActions: { flexDirection: 'row', gap: spacing.sm },
-  detailEditBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, backgroundColor: colors.accent, borderRadius: radius.md,
-    paddingVertical: 12,
+  detailValue: { color: colors.textPrimary, fontSize: 14, fontWeight: '500' },
+  detailActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingTop: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
-  detailEditText: { color: colors.white, fontSize: 15, fontWeight: '600' },
-  detailArchiveBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: radius.md,
-    paddingVertical: 12,
+  editAction: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.accentDim,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+    paddingVertical: 11,
   },
-  detailArchiveText: { color: colors.white, fontSize: 15, fontWeight: '600' },
+  editActionText: { color: colors.accent, fontSize: 14, fontWeight: '600' },
+  archiveAction: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    paddingVertical: 11,
+  },
+  archiveActionText: { color: colors.textSecondary, fontSize: 14, fontWeight: '500' },
 });

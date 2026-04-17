@@ -1,16 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  TextInput,
-  Dimensions,
-  Pressable,
-  PanResponder,
-  Animated,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  Modal, TextInput, Dimensions, Pressable, PanResponder, Animated, Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../theme';
@@ -64,64 +55,45 @@ const SAMPLE_ITEMS: FridgeItem[] = [
 const FILTERS = ['list', 'fridge', 'unread', 'all'] as const;
 
 // --- Draggable note ---
-type DraggableNoteProps = {
-  item: FridgeItem;
-  onTap: () => void;
-  onDragEnd: (x: number, y: number) => void;
-};
-
-function DraggableNote({ item, onTap, onDragEnd }: DraggableNoteProps) {
+function DraggableNote({ item, onTap, onDragEnd }: {
+  item: FridgeItem; onTap: () => void; onDragEnd: (x: number, y: number) => void;
+}) {
   const pan = useRef(new Animated.ValueXY({ x: item.x, y: item.y })).current;
   const isDragging = useRef(false);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5,
       onPanResponderGrant: () => {
         isDragging.current = false;
-        pan.setOffset({
-          x: (pan.x as any)._value,
-          y: (pan.y as any)._value,
-        });
+        pan.setOffset({ x: (pan.x as any)._value, y: (pan.y as any)._value });
         pan.setValue({ x: 0, y: 0 });
       },
       onPanResponderMove: (_, g) => {
-        if (Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5) {
-          isDragging.current = true;
-        }
-        Animated.event([null, { dx: pan.x, dy: pan.y }], {
-          useNativeDriver: false,
-        })(_, g);
+        if (Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5) isDragging.current = true;
+        Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false })(_, g);
       },
       onPanResponderRelease: () => {
         pan.flattenOffset();
-        const finalX = Math.max(0, Math.min((pan.x as any)._value, FRIDGE_W - 100));
-        const finalY = Math.max(0, Math.min((pan.y as any)._value, FRIDGE_H - 60));
+        const finalX = Math.max(0, Math.min((pan.x as any)._value, FRIDGE_W - 120));
+        const finalY = Math.max(0, Math.min((pan.y as any)._value, FRIDGE_H - 80));
         pan.setValue({ x: finalX, y: finalY });
-        if (!isDragging.current) {
-          onTap();
-        } else {
-          onDragEnd(finalX, finalY);
-        }
+        if (!isDragging.current) onTap();
+        else onDragEnd(finalX, finalY);
       },
     }),
   ).current;
 
   return (
     <Animated.View
-      style={[
-        styles.fridgeNote,
-        { transform: [{ translateX: pan.x }, { translateY: pan.y }] },
-      ]}
+      style={[styles.fridgeNote, item.important && styles.fridgeNoteImportant, { transform: [{ translateX: pan.x }, { translateY: pan.y }] }]}
       {...panResponder.panHandlers}
     >
-      {item.important && <Text style={styles.importantBadge}>Important!</Text>}
+      {item.important && <Text style={styles.importantBadge}>Important</Text>}
       <Text style={styles.noteText} numberOfLines={3}>{item.text}</Text>
-      <Text style={styles.noteAuthor}>- {item.author}</Text>
+      <Text style={styles.noteAuthor}>— {item.author}</Text>
       <View style={styles.noteFooter}>
-        <Ionicons name="ellipsis-horizontal" size={14} color={colors.textMuted} />
         <View style={styles.reactionDots}>
           {item.reactions.map((c, i) => (
             <View key={i} style={[styles.dot, { backgroundColor: c }]} />
@@ -135,64 +107,50 @@ function DraggableNote({ item, onTap, onDragEnd }: DraggableNoteProps) {
 // --- Main screen ---
 export default function UpdatesScreen() {
   const { user } = useAuth();
-  const [items, setItems] = useState<FridgeItem[]>(SAMPLE_ITEMS);
+  const [items, setItems]               = useState<FridgeItem[]>(SAMPLE_ITEMS);
   const [activeFilter, setActiveFilter] = useState<string>('fridge');
   const [selectedItem, setSelectedItem] = useState<FridgeItem | null>(null);
-  const [showAdd, setShowAdd] = useState(false);
-  const [editingItem, setEditingItem] = useState<FridgeItem | null>(null);
+  const [showAdd, setShowAdd]           = useState(false);
+  const [editingItem, setEditingItem]   = useState<FridgeItem | null>(null);
 
   // Form state
-  const [formText, setFormText] = useState('');
+  const [formText,      setFormText]      = useState('');
   const [formImportant, setFormImportant] = useState(false);
-  const [formFridgeCollage, setFormFridgeCollage] = useState(true);
+  const [formFridgeOn,  setFormFridgeOn]  = useState(true);
 
   const updatePosition = useCallback((id: string, x: number, y: number) => {
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, x, y } : item)));
   }, []);
 
   const openAdd = () => {
-    setFormText('');
-    setFormImportant(false);
-    setFormFridgeCollage(true);
-    setEditingItem(null);
-    setShowAdd(true);
+    setFormText(''); setFormImportant(false); setFormFridgeOn(true);
+    setEditingItem(null); setShowAdd(true);
   };
 
   const openEdit = (item: FridgeItem) => {
-    setFormText(item.text ?? '');
-    setFormImportant(item.important ?? false);
-    setFormFridgeCollage(item.fridgeCollage ?? true);
-    setEditingItem(item);
-    setSelectedItem(null);
-    setShowAdd(true);
+    setFormText(item.text ?? ''); setFormImportant(item.important ?? false);
+    setFormFridgeOn(item.fridgeCollage ?? true);
+    setEditingItem(item); setSelectedItem(null); setShowAdd(true);
   };
 
   const handleSave = () => {
     if (!formText.trim()) return;
     if (editingItem) {
-      setItems((prev) =>
-        prev.map((i) =>
-          i.id === editingItem.id
-            ? { ...i, text: formText.trim(), important: formImportant, fridgeCollage: formFridgeCollage }
-            : i,
-        ),
-      );
+      setItems((prev) => prev.map((i) =>
+        i.id === editingItem.id
+          ? { ...i, text: formText.trim(), important: formImportant, fridgeCollage: formFridgeOn }
+          : i,
+      ));
     } else {
-      const item: FridgeItem = {
-        id: Date.now().toString(),
-        type: 'note',
-        text: formText.trim(),
-        important: formImportant,
-        fridgeCollage: formFridgeCollage,
+      setItems([{
+        id: Date.now().toString(), type: 'note',
+        text: formText.trim(), important: formImportant,
+        fridgeCollage: formFridgeOn,
         author: user?.displayName ?? 'Anonymous',
-        reactions: [],
-        x: (FRIDGE_W - 120) / 2,
-        y: (FRIDGE_H - 80) / 2,
-      };
-      setItems([item, ...items]);
+        reactions: [], x: (FRIDGE_W - 120) / 2, y: (FRIDGE_H - 80) / 2,
+      }, ...items]);
     }
-    setShowAdd(false);
-    setEditingItem(null);
+    setShowAdd(false); setEditingItem(null);
   };
 
   const archiveItem = (id: string) => {
@@ -201,47 +159,49 @@ export default function UpdatesScreen() {
   };
 
   const toggleReaction = (itemId: string, color: string) => {
-    setItems(
-      items.map((item) => {
-        if (item.id !== itemId) return item;
-        const has = item.reactions.includes(color);
-        return { ...item, reactions: has ? item.reactions.filter((r) => r !== color) : [...item.reactions, color] };
-      }),
+    const toggle = (list: string[]) =>
+      list.includes(color) ? list.filter((r) => r !== color) : [...list, color];
+    setItems(items.map((item) =>
+      item.id === itemId ? { ...item, reactions: toggle(item.reactions) } : item,
+    ));
+    setSelectedItem((prev) =>
+      prev?.id === itemId ? { ...prev, reactions: toggle(prev.reactions) } : prev,
     );
-    setSelectedItem((prev) => {
-      if (!prev || prev.id !== itemId) return prev;
-      const has = prev.reactions.includes(color);
-      return { ...prev, reactions: has ? prev.reactions.filter((r) => r !== color) : [...prev.reactions, color] };
-    });
   };
 
-  const displayName = user?.displayName ?? 'You';
+  const showFridge = activeFilter === 'fridge' || activeFilter === 'all';
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Fridge</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
-          <Ionicons name="add" size={22} color={colors.white} />
+        <TouchableOpacity style={styles.addBtn} onPress={openAdd} activeOpacity={0.8}>
+          <Ionicons name="add" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
-      {/* Filter tabs */}
-      <View style={styles.filterRow}>
+      {/* Filters */}
+      <ScrollView
+        horizontal showsHorizontalScrollIndicator={false}
+        style={styles.filterScroll}
+        contentContainerStyle={styles.filterContent}
+      >
         {FILTERS.map((f) => (
           <TouchableOpacity
             key={f}
             style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}
             onPress={() => setActiveFilter(f)}
           >
-            <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>{f}</Text>
+            <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>
+              {f}
+            </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
-      {/* Fridge body */}
-      {activeFilter === 'fridge' || activeFilter === 'all' ? (
+      {/* Fridge / List body */}
+      {showFridge ? (
         <View style={styles.fridgeWrap}>
           <View style={styles.fridge}>
             <View style={styles.fridgeHandle} />
@@ -255,77 +215,76 @@ export default function UpdatesScreen() {
               />
             ))}
           </View>
-          <TouchableOpacity style={styles.helpBtn}>
-            <Ionicons name="help" size={22} color={colors.white} />
-          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.listContent}>
           {items.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={styles.listCard}
+              style={[styles.listCard, item.important && styles.listCardImportant]}
               onPress={() => setSelectedItem(item)}
               activeOpacity={0.8}
             >
-              {item.important && <Text style={styles.importantBadgeList}>Important!</Text>}
+              {item.important && (
+                <View style={styles.importantPill}>
+                  <Text style={styles.importantPillText}>Important</Text>
+                </View>
+              )}
               <Text style={styles.listCardText}>{item.text}</Text>
-              <Text style={styles.listCardAuthor}>- {item.author}</Text>
-              <View style={styles.reactionDots}>
-                {item.reactions.map((c, i) => (
-                  <View key={i} style={[styles.dot, { backgroundColor: c }]} />
-                ))}
+              <View style={styles.listCardFooter}>
+                <Text style={styles.listCardAuthor}>— {item.author}</Text>
+                <View style={styles.reactionDots}>
+                  {item.reactions.map((c, i) => (
+                    <View key={i} style={[styles.dot, { backgroundColor: c }]} />
+                  ))}
+                </View>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
       )}
 
-      {/* View note popup */}
+      {/* View note modal */}
       <Modal visible={!!selectedItem} transparent animationType="fade" onRequestClose={() => setSelectedItem(null)}>
         <Pressable style={styles.overlay} onPress={() => setSelectedItem(null)}>
-          <Pressable style={styles.cardModal} onPress={(e) => e.stopPropagation()}>
-            {/* Avatar + name */}
-            <View style={styles.cardAvatar}>
-              <Ionicons name="person" size={28} color={colors.textMuted} />
+          <Pressable style={styles.noteModal} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.noteModalAvatar}>
+              <Ionicons name="person" size={22} color={colors.textMuted} />
             </View>
-            <Text style={styles.cardName}>{selectedItem?.author}</Text>
-
-            {/* Note text */}
-            <View style={styles.cardTextBox}>
-              <Text style={styles.cardText}>{selectedItem?.text}</Text>
-            </View>
+            <Text style={styles.noteModalAuthor}>{selectedItem?.author}</Text>
 
             {selectedItem?.important && (
-              <View style={styles.cardCheckRow}>
-                <Ionicons name="checkbox" size={20} color={colors.white} />
-                <Text style={styles.cardCheckLabel}>Important!</Text>
+              <View style={styles.importantPill}>
+                <Text style={styles.importantPillText}>Important</Text>
               </View>
             )}
 
+            <View style={styles.noteModalTextBox}>
+              <Text style={styles.noteModalText}>{selectedItem?.text}</Text>
+            </View>
+
             {/* Reactions */}
-            <View style={styles.cardReactions}>
+            <View style={styles.reactionRow}>
               {REACTION_COLORS.map((c) => (
                 <TouchableOpacity key={c} onPress={() => selectedItem && toggleReaction(selectedItem.id, c)}>
                   <View style={[
-                    styles.dotLarge,
+                    styles.reactionDotLg,
                     { backgroundColor: c },
-                    selectedItem?.reactions.includes(c) && styles.dotLargeActive,
+                    selectedItem?.reactions.includes(c) && styles.reactionDotLgActive,
                   ]} />
                 </TouchableOpacity>
               ))}
             </View>
 
             {/* Actions */}
-            <View style={styles.cardActions}>
-              <TouchableOpacity style={styles.cardActionBtn} onPress={() => selectedItem && openEdit(selectedItem)}>
-                <Text style={styles.cardActionText}>Edit</Text>
+            <View style={styles.noteModalActions}>
+              <TouchableOpacity style={styles.noteEditBtn} onPress={() => selectedItem && openEdit(selectedItem)}>
+                <Ionicons name="pencil-outline" size={15} color={colors.accent} />
+                <Text style={styles.noteEditText}>Edit</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.cardActionBtn, styles.archiveBtn]}
-                onPress={() => selectedItem && archiveItem(selectedItem.id)}
-              >
-                <Text style={styles.archiveBtnText}>Archive</Text>
+              <TouchableOpacity style={styles.noteArchiveBtn} onPress={() => selectedItem && archiveItem(selectedItem.id)}>
+                <Ionicons name="archive-outline" size={15} color={colors.textMuted} />
+                <Text style={styles.noteArchiveText}>Archive</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -334,196 +293,272 @@ export default function UpdatesScreen() {
 
       {/* Add / Edit modal */}
       <Modal visible={showAdd} transparent animationType="slide" onRequestClose={() => setShowAdd(false)}>
-        <Pressable style={styles.overlay} onPress={() => setShowAdd(false)}>
-          <Pressable style={styles.cardModal} onPress={(e) => e.stopPropagation()}>
-            {/* Avatar + name */}
-            <View style={styles.cardAvatar}>
-              <Ionicons name="person" size={28} color={colors.textMuted} />
+        <View style={styles.overlay}>
+          <View style={styles.addModal}>
+            <View style={styles.addModalHeader}>
+              <TouchableOpacity onPress={() => setShowAdd(false)} style={styles.addModalClose}>
+                <Ionicons name="close" size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              <Text style={styles.addModalTitle}>{editingItem ? 'Edit note' : 'New note'}</Text>
+              <TouchableOpacity style={styles.addModalSave} onPress={handleSave}>
+                <Text style={styles.addModalSaveText}>Save</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.cardName}>{displayName}</Text>
 
-            {/* Text input */}
             <TextInput
-              style={styles.cardInput}
-              placeholder="Enter Update Text"
-              placeholderTextColor="rgba(0,0,0,0.35)"
+              style={styles.addInput}
               value={formText}
               onChangeText={setFormText}
+              placeholder="What's on your mind?"
+              placeholderTextColor={colors.textMuted}
               multiline
               autoFocus
+              textAlignVertical="top"
             />
 
-            {/* Important */}
-            <TouchableOpacity style={styles.cardCheckRow} onPress={() => setFormImportant(!formImportant)}>
-              <Ionicons
-                name={formImportant ? 'checkbox' : 'square-outline'}
-                size={20}
-                color={formImportant ? colors.white : 'rgba(255,255,255,0.5)'}
+            <View style={styles.addToggleRow}>
+              <Text style={styles.addToggleLabel}>Mark as important</Text>
+              <Switch
+                value={formImportant}
+                onValueChange={setFormImportant}
+                trackColor={{ false: colors.surfaceRaised, true: colors.accent }}
+                thumbColor={colors.textPrimary}
               />
-              <Text style={styles.cardCheckLabel}>Important!</Text>
-            </TouchableOpacity>
-
-            {/* Fridge Collage + Image */}
-            <View style={styles.cardOptionRow}>
-              <TouchableOpacity style={styles.cardCheckRow} onPress={() => setFormFridgeCollage(!formFridgeCollage)}>
-                <Ionicons
-                  name={formFridgeCollage ? 'checkbox' : 'square-outline'}
-                  size={20}
-                  color={formFridgeCollage ? colors.white : 'rgba(255,255,255,0.5)'}
-                />
-                <Text style={styles.cardCheckLabel}>Fridge Collage</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.cardCheckRow}>
-                <Ionicons name="attach" size={20} color="rgba(255,255,255,0.7)" />
-                <Text style={styles.cardCheckLabel}>Image</Text>
-              </TouchableOpacity>
             </View>
-
-            {/* Save button */}
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-              <Text style={styles.saveBtnText}>{editingItem ? 'Save Edit' : 'Add'}</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
+            <View style={styles.addToggleRow}>
+              <Text style={styles.addToggleLabel}>Show on fridge</Text>
+              <Switch
+                value={formFridgeOn}
+                onValueChange={setFormFridgeOn}
+                trackColor={{ false: colors.surfaceRaised, true: colors.success }}
+                thumbColor={colors.textPrimary}
+              />
+            </View>
+          </View>
+        </View>
       </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 56 },
 
   // Header
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingHorizontal: spacing.lg, marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+    marginBottom: spacing.sm,
   },
-  headerTitle: {
-    fontSize: 28, fontWeight: '700', color: colors.white,
-    flex: 1, textAlign: 'center', letterSpacing: 0.3,
-  },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: colors.textPrimary },
   addBtn: {
-    width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accent,
+    width: 34, height: 34, borderRadius: radius.sm,
+    backgroundColor: colors.accent,
     alignItems: 'center', justifyContent: 'center',
   },
 
   // Filters
-  filterRow: {
-    flexDirection: 'row', justifyContent: 'center', gap: 8,
-    marginBottom: spacing.md, paddingHorizontal: spacing.lg,
-  },
+  filterScroll: { maxHeight: 38, marginBottom: spacing.sm },
+  filterContent: { paddingHorizontal: spacing.lg, gap: 8, alignItems: 'center' },
   filterChip: {
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
-    borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 6,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+    borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 7,
   },
-  filterChipActive: { backgroundColor: colors.accentDim, borderColor: colors.accent },
-  filterText: { color: colors.textMuted, fontSize: 13, fontWeight: '500' },
-  filterTextActive: { color: colors.accentLight },
+  filterChipActive: { backgroundColor: colors.accentDim, borderColor: colors.accentBorder },
+  filterText: { color: colors.textMuted, fontSize: 13, textTransform: 'capitalize' },
+  filterTextActive: { color: colors.accentSoft, fontWeight: '500' },
 
   // Fridge
-  fridgeWrap: { flex: 1, alignItems: 'center' },
+  fridgeWrap: {
+    flex: 1, alignItems: 'center', paddingTop: spacing.sm,
+  },
   fridge: {
-    width: FRIDGE_W, height: FRIDGE_H, backgroundColor: colors.accentLight,
-    borderRadius: radius.lg, overflow: 'hidden', position: 'relative',
+    width: FRIDGE_W, height: FRIDGE_H,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    position: 'relative',
   },
   fridgeHandle: {
-    position: 'absolute', right: 8, top: '15%', width: 8, height: '20%',
-    backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 4, zIndex: 0,
+    width: 40, height: 8, borderRadius: 4,
+    backgroundColor: colors.surfaceHover,
+    alignSelf: 'center', marginTop: 10,
   },
   fridgeDivider: {
-    position: 'absolute', top: '50%', left: 0, right: 0, height: 3,
-    backgroundColor: 'rgba(0,0,0,0.15)', zIndex: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginTop: 12,
   },
 
-  // Notes on fridge
+  // Draggable note
   fridgeNote: {
-    position: 'absolute', left: 0, top: 0,
-    backgroundColor: 'rgba(240,240,255,0.92)', borderRadius: 6,
-    padding: 10, maxWidth: '45%', minWidth: 90,
-    shadowColor: '#000', shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.2, shadowRadius: 4, elevation: 3, zIndex: 5,
+    position: 'absolute',
+    width: 130,
+    backgroundColor: '#FFFDE7',
+    borderRadius: radius.sm,
+    padding: 10,
+    gap: 4,
   },
-  importantBadge: { color: colors.red, fontSize: 12, fontWeight: '700', marginBottom: 2 },
-  noteText: { color: '#1a1a2e', fontSize: 13, fontWeight: '600', lineHeight: 17 },
-  noteAuthor: { color: '#555', fontSize: 11, marginTop: 4 },
-  noteFooter: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6,
+  fridgeNoteImportant: {
+    borderTopWidth: 3,
+    borderTopColor: colors.danger,
   },
+  importantBadge: {
+    fontSize: 10, fontWeight: '700',
+    color: colors.danger,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  noteText: { fontSize: 12, color: '#333', lineHeight: 16 },
+  noteAuthor: { fontSize: 10, color: '#888', fontStyle: 'italic' },
+  noteFooter: { flexDirection: 'row', justifyContent: 'flex-end' },
   reactionDots: { flexDirection: 'row', gap: 3 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-
-  helpBtn: {
-    position: 'absolute', bottom: 90, right: 24, width: 40, height: 40,
-    borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.7)',
-    borderWidth: 2, borderColor: colors.white,
-    alignItems: 'center', justifyContent: 'center', zIndex: 10,
-  },
+  dot: { width: 8, height: 8, borderRadius: 4 },
 
   // List view
-  listContent: { paddingHorizontal: spacing.lg, paddingBottom: 100, gap: spacing.sm },
-  listCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md },
-  importantBadgeList: { color: colors.red, fontSize: 12, fontWeight: '700', marginBottom: 4 },
-  listCardText: { color: colors.white, fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  listCardAuthor: { color: colors.textMuted, fontSize: 13, marginBottom: 8 },
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100,
+    gap: spacing.sm,
+  },
+  listCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.md,
+    gap: 8,
+  },
+  listCardImportant: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.danger,
+  },
+  listCardText: { color: colors.textPrimary, fontSize: 15, lineHeight: 22 },
+  listCardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  listCardAuthor: { color: colors.textMuted, fontSize: 13, fontStyle: 'italic' },
+  importantPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,69,58,0.12)',
+    borderWidth: 1, borderColor: 'rgba(255,69,58,0.25)',
+    borderRadius: radius.pill,
+    paddingHorizontal: 9, paddingVertical: 3,
+  },
+  importantPillText: { color: colors.danger, fontSize: 11, fontWeight: '600' },
 
   // Overlay
   overlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center', justifyContent: 'center',
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  // Purple card modal (matching mockup)
-  cardModal: {
-    backgroundColor: colors.accent, borderRadius: 20,
-    padding: spacing.xl, width: '82%', maxWidth: 340,
-    alignItems: 'center',
+  // Note detail modal
+  noteModal: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    width: '85%',
+    maxWidth: 360,
+    gap: spacing.sm,
   },
-  cardAvatar: {
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: 'rgba(200,200,210,0.6)',
-    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+  noteModalAvatar: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: colors.surfaceRaised,
+    alignItems: 'center', justifyContent: 'center',
+    alignSelf: 'center',
   },
-  cardName: {
-    color: colors.white, fontSize: 18, fontWeight: '700', marginBottom: spacing.md,
+  noteModalAuthor: {
+    textAlign: 'center',
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '500',
   },
-  cardTextBox: {
-    backgroundColor: 'rgba(240,240,250,0.9)', borderRadius: radius.sm,
-    padding: spacing.md, width: '100%', minHeight: 60, marginBottom: spacing.md,
+  noteModalTextBox: {
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.md,
   },
-  cardText: { color: '#1a1a2e', fontSize: 15, lineHeight: 20 },
-  cardInput: {
-    backgroundColor: 'rgba(240,240,250,0.9)', borderRadius: radius.sm,
-    padding: spacing.md, width: '100%', minHeight: 80,
-    color: '#1a1a2e', fontSize: 15, textAlignVertical: 'top', marginBottom: spacing.md,
+  noteModalText: { color: colors.textPrimary, fontSize: 15, lineHeight: 22 },
+  reactionRow: { flexDirection: 'row', gap: 10, justifyContent: 'center' },
+  reactionDotLg: { width: 24, height: 24, borderRadius: 12 },
+  reactionDotLgActive: { borderWidth: 2.5, borderColor: colors.textPrimary },
+  noteModalActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
-  cardCheckRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    alignSelf: 'flex-start', marginBottom: spacing.sm,
+  noteEditBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, backgroundColor: colors.accentDim,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.accentBorder,
+    paddingVertical: 10,
   },
-  cardCheckLabel: { color: colors.white, fontSize: 15, fontWeight: '600' },
-  cardOptionRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    width: '100%', marginBottom: spacing.md,
+  noteEditText: { color: colors.accent, fontSize: 14, fontWeight: '600' },
+  noteArchiveBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+    paddingVertical: 10,
   },
-  cardReactions: {
-    flexDirection: 'row', gap: 8, marginVertical: spacing.md,
+  noteArchiveText: { color: colors.textSecondary, fontSize: 14, fontWeight: '500' },
+
+  // Add / Edit modal
+  addModal: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    width: '90%',
+    maxWidth: 400,
+    gap: spacing.md,
   },
-  dotLarge: { width: 24, height: 24, borderRadius: 12, opacity: 0.4 },
-  dotLargeActive: { opacity: 1, borderWidth: 2, borderColor: 'rgba(255,255,255,0.5)' },
-  cardActions: {
-    flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm, width: '100%',
+  addModalHeader: {
+    flexDirection: 'row', alignItems: 'center',
   },
-  cardActionBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: radius.md,
-    backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center',
+  addModalClose: {
+    width: 30, height: 30, borderRadius: radius.sm,
+    backgroundColor: colors.surfaceRaised,
+    alignItems: 'center', justifyContent: 'center',
   },
-  cardActionText: { color: colors.white, fontSize: 15, fontWeight: '600' },
-  archiveBtn: { backgroundColor: 'rgba(0,0,0,0.5)' },
-  archiveBtnText: { color: colors.white, fontSize: 15, fontWeight: '700' },
-  saveBtn: {
-    backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: radius.md,
-    paddingVertical: 14, width: '100%', alignItems: 'center', marginTop: spacing.sm,
+  addModalTitle: {
+    flex: 1, textAlign: 'center',
+    color: colors.textPrimary, fontSize: 16, fontWeight: '600',
   },
-  saveBtnText: { color: colors.white, fontSize: 17, fontWeight: '700' },
+  addModalSave: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.md,
+    paddingHorizontal: 16, paddingVertical: 7,
+  },
+  addModalSaveText: { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
+  addInput: {
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.md,
+    color: colors.textPrimary,
+    fontSize: 15,
+    minHeight: 100,
+    lineHeight: 22,
+  },
+  addToggleRow: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', paddingVertical: 4,
+  },
+  addToggleLabel: { color: colors.textPrimary, fontSize: 15 },
 });

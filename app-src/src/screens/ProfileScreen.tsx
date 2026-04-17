@@ -1,98 +1,117 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
+import { useSyncContext } from '../contexts/SyncContext';
 
 export default function ProfileScreen() {
   const { user, setUserColor, availableColors } = useAuth();
+  const { tasks, events, roommates } = useSyncContext();
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  const userColor = user?.color ?? colors.accent;
+  const userColor   = user?.color ?? colors.accent;
+  const doneTasks   = tasks.filter((t) => t.done).length;
+  const activeTasks = tasks.filter((t) => !t.done).length;
+
+  const initial = user?.displayName?.[0]?.toUpperCase() ?? '?';
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.pageTitle}>Profile</Text>
 
-      <View style={[styles.avatarRing, { borderColor: userColor }]}>
+      {/* Avatar */}
+      <View style={[styles.avatarRing, { borderColor: userColor + '66' }]}>
         <View style={[styles.avatar, { backgroundColor: userColor }]}>
-          <Ionicons name="person" size={56} color={colors.white} />
+          <Text style={styles.avatarInitial}>{initial}</Text>
         </View>
       </View>
 
       <Text style={styles.name}>{user?.displayName ?? 'Your Name'}</Text>
+      <Text style={styles.username}>@{user?.username ?? 'username'}</Text>
 
       <View style={styles.statusBadge}>
-        <Text style={styles.statusText}>{'\u{1F3E0}'} Home</Text>
+        <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
+        <Text style={styles.statusText}>Home</Text>
       </View>
 
-      {/* Color picker toggle */}
-      <TouchableOpacity
-        style={styles.colorToggle}
-        onPress={() => setShowColorPicker(!showColorPicker)}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.colorDot, { backgroundColor: userColor }]} />
-        <Text style={styles.colorToggleText}>Change color</Text>
-        <Ionicons
-          name={showColorPicker ? 'chevron-up' : 'chevron-down'}
-          size={16}
-          color={colors.textSecondary}
-        />
-      </TouchableOpacity>
-
-      {showColorPicker && (
-        <View style={styles.colorGrid}>
-          {availableColors.map((c) => (
-            <TouchableOpacity
-              key={c}
-              onPress={() => setUserColor(c)}
-              activeOpacity={0.7}
-              style={[
-                styles.colorOption,
-                { backgroundColor: c },
-                c === userColor && styles.colorOptionSelected,
-              ]}
-            />
-          ))}
-        </View>
-      )}
-
-      <View style={styles.statsRow}>
-        <View style={styles.stat}>
-          <Text style={styles.statNumber}>3</Text>
-          <Text style={styles.statLabel}>Tasks</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.stat}>
-          <Text style={styles.statNumber}>1</Text>
-          <Text style={styles.statLabel}>Events</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.stat}>
-          <Text style={styles.statNumber}>4</Text>
-          <Text style={styles.statLabel}>Roomies</Text>
-        </View>
+      {/* Stats card */}
+      <View style={styles.statsCard}>
+        {[
+          { label: 'Active tasks', value: activeTasks },
+          { label: 'Completed',    value: doneTasks },
+          { label: 'Events',       value: events.length },
+          { label: 'Roomies',      value: roommates.length },
+        ].map((stat, i, arr) => (
+          <React.Fragment key={stat.label}>
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+            {i < arr.length - 1 && <View style={styles.statDivider} />}
+          </React.Fragment>
+        ))}
       </View>
-    </View>
+
+      {/* Color picker */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={styles.sectionRow}
+          onPress={() => setShowColorPicker(!showColorPicker)}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.colorSwatch, { backgroundColor: userColor }]} />
+          <Text style={styles.sectionLabel}>Profile color</Text>
+          <Ionicons
+            name={showColorPicker ? 'chevron-up' : 'chevron-down'}
+            size={16}
+            color={colors.textMuted}
+          />
+        </TouchableOpacity>
+
+        {showColorPicker && (
+          <View style={styles.colorGrid}>
+            {availableColors.map((c) => (
+              <TouchableOpacity
+                key={c}
+                onPress={() => setUserColor(c)}
+                activeOpacity={0.7}
+              >
+                <View style={[
+                  styles.colorOption,
+                  { backgroundColor: c },
+                  c === userColor && styles.colorOptionSelected,
+                ]} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
-const AVATAR_SIZE = 110;
+const AVATAR_SIZE = 104;
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1, backgroundColor: colors.background },
   container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 80,
+    paddingTop: 72,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100,
     alignItems: 'center',
+    gap: spacing.md,
   },
-  title: {
-    fontSize: 30,
+  pageTitle: {
+    fontSize: 28,
     fontWeight: '700',
-    color: colors.white,
-    marginBottom: spacing.xl,
-    letterSpacing: 0.3,
+    color: colors.textPrimary,
+    alignSelf: 'flex-start',
+    marginBottom: spacing.md,
   },
   avatarRing: {
     width: AVATAR_SIZE + 8,
@@ -101,7 +120,6 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.lg,
   },
   avatar: {
     width: AVATAR_SIZE,
@@ -110,85 +128,102 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  name: {
-    color: colors.white,
-    fontSize: 24,
+  avatarInitial: {
+    color: '#fff',
+    fontSize: 42,
     fontWeight: '700',
-    marginBottom: spacing.sm,
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginTop: 4,
+  },
+  username: {
+    fontSize: 14,
+    color: colors.textMuted,
+    marginTop: -4,
   },
   statusBadge: {
-    backgroundColor: colors.accentDim,
-    borderRadius: radius.pill,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    marginBottom: spacing.lg,
-  },
-  statusText: {
-    color: colors.gold,
-    fontSize: 15,
-    fontWeight: '500',
-  },
-
-  // Color picker
-  colorToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: spacing.md,
+    gap: 6,
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
-  colorDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  statusText: { color: colors.textSecondary, fontSize: 14, fontWeight: '500' },
+
+  // Stats
+  statsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.sm,
+    marginTop: spacing.sm,
   },
-  colorToggleText: {
-    color: colors.textSecondary,
-    fontSize: 14,
+  stat: { flex: 1, alignItems: 'center', gap: 3 },
+  statValue: { fontSize: 22, fontWeight: '700', color: colors.textPrimary },
+  statLabel: { fontSize: 12, color: colors.textMuted, textAlign: 'center' },
+  statDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 36,
+    backgroundColor: colors.border,
+  },
+
+  // Section card
+  section: {
+    alignSelf: 'stretch',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    overflow: 'hidden',
+    marginTop: spacing.sm,
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: spacing.md,
+  },
+  colorSwatch: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  sectionLabel: {
+    flex: 1,
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '400',
   },
   colorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 14,
+    padding: spacing.md,
+    paddingTop: 0,
     justifyContent: 'center',
-    gap: 12,
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.xl,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
   colorOption: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
   },
   colorOptionSelected: {
     borderWidth: 3,
-    borderColor: colors.white,
-  },
-
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.md,
-    marginHorizontal: spacing.lg,
-  },
-  stat: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    color: colors.white,
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  statLabel: {
-    color: colors.textMuted,
-    fontSize: 13,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderColor: colors.textPrimary,
   },
 });

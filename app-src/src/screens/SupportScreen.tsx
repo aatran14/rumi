@@ -7,74 +7,139 @@ import ScreenHeader from '../components/ScreenHeader';
 
 type Props = { navigation: StackScreenNavigation };
 
+const OPTIONS = [
+  {
+    icon: 'mail-outline' as const,
+    title: 'Email us',
+    sub: 'support@rumiapp.co',
+    onPress: () => Linking.openURL('mailto:support@rumiapp.co'),
+  },
+  {
+    icon: 'bug-outline' as const,
+    title: 'Report a bug',
+    sub: 'Help us squash issues',
+    onPress: () => {},
+  },
+  {
+    icon: 'bulb-outline' as const,
+    title: 'Feature request',
+    sub: 'Tell us what you want next',
+    onPress: () => {},
+  },
+];
+
 export default function SupportScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <ScreenHeader title="Support" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+
         <View style={styles.heroCard}>
-          <Ionicons name="chatbubbles" size={40} color={colors.accentLight} />
+          <View style={styles.heroIcon}>
+            <Ionicons name="chatbubbles-outline" size={28} color={colors.accent} />
+          </View>
           <Text style={styles.heroTitle}>Need help?</Text>
           <Text style={styles.heroSub}>
             We're here for you. Reach out and we'll get back to you within 24 hours.
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.option}>
-          <View style={styles.iconWrap}>
-            <Ionicons name="mail-outline" size={20} color={colors.accent} />
-          </View>
-          <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>Email Us</Text>
-            <Text style={styles.optionSub}>support@rumiapp.co</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <View style={styles.iconWrap}>
-            <Ionicons name="bug-outline" size={20} color={colors.accent} />
-          </View>
-          <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>Report a Bug</Text>
-            <Text style={styles.optionSub}>Help us squash issues</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <View style={styles.iconWrap}>
-            <Ionicons name="bulb-outline" size={20} color={colors.accent} />
-          </View>
-          <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>Feature Request</Text>
-            <Text style={styles.optionSub}>Tell us what you want next</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
+        <View style={styles.card}>
+          {OPTIONS.map((opt, i) => (
+            <TouchableOpacity
+              key={opt.title}
+              style={[styles.row, i < OPTIONS.length - 1 && styles.rowBorder]}
+              onPress={opt.onPress}
+              activeOpacity={0.6}
+            >
+              <View style={styles.iconWrap}>
+                <Ionicons name={opt.icon} size={18} color={colors.accent} />
+              </View>
+              <View style={styles.textWrap}>
+                <Text style={styles.optTitle}>{opt.title}</Text>
+                <Text style={styles.optSub}>{opt.sub}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingTop: 64 },
-  content: { paddingHorizontal: spacing.lg, paddingBottom: 100 },
-  heroCard: {
-    backgroundColor: colors.surface, borderRadius: radius.lg,
-    padding: spacing.xl, alignItems: 'center', marginBottom: spacing.xl, gap: 8,
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 56 },
+  content: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100,
+    gap: spacing.md,
   },
-  heroTitle: { color: colors.white, fontSize: 22, fontWeight: '700' },
-  heroSub: { color: colors.textSecondary, fontSize: 14, textAlign: 'center', lineHeight: 20 },
-  option: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
-    borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm,
+  heroCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    alignItems: 'center',
+    gap: 10,
+  },
+  heroIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroTitle: {
+    color: colors.textPrimary,
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  heroSub: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: spacing.md,
+    gap: 12,
+  },
+  rowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
   iconWrap: {
-    width: 38, height: 38, borderRadius: 10, backgroundColor: colors.accentDim,
-    alignItems: 'center', justifyContent: 'center',
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    backgroundColor: colors.accentDim,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  optionText: { flex: 1, marginLeft: 14 },
-  optionTitle: { color: colors.white, fontSize: 16, fontWeight: '600' },
-  optionSub: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
+  textWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  optTitle: {
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  optSub: {
+    color: colors.textMuted,
+    fontSize: 13,
+  },
 });

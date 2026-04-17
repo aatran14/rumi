@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../theme';
+import { colors, spacing, radius } from '../theme';
 
 type RadioOption = { label: string; value: string };
 
@@ -14,72 +13,71 @@ type Props = {
 export default function RadioGroup({ options, selected, onSelect }: Props) {
   return (
     <View style={styles.group}>
-      {options.map((opt) => (
-        <TouchableOpacity
-          key={opt.value}
-          style={styles.row}
-          onPress={() => onSelect(opt.value)}
-          accessibilityRole="radio"
-          accessibilityState={{ selected: selected === opt.value }}
-        >
-          <View
-            style={[
-              styles.radio,
-              selected === opt.value && styles.radioSelected,
-            ]}
+      {options.map((opt) => {
+        const active = selected === opt.value;
+        return (
+          <TouchableOpacity
+            key={opt.value}
+            style={[styles.row, active && styles.rowActive]}
+            onPress={() => onSelect(opt.value)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: active }}
+            activeOpacity={0.7}
           >
-            {selected === opt.value && <View style={styles.radioDot} />}
-          </View>
-          <Text
-            style={[
-              styles.label,
-              selected === opt.value && styles.labelSelected,
-            ]}
-          >
-            {opt.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+            <View style={[styles.radio, active && styles.radioActive]}>
+              {active && <View style={styles.dot} />}
+            </View>
+            <Text style={[styles.label, active && styles.labelActive]}>
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   group: {
-    marginLeft: spacing.md,
-    marginBottom: spacing.lg,
     gap: 2,
+    marginBottom: spacing.lg,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 11,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
     gap: 12,
   },
+  rowActive: {
+    backgroundColor: colors.accentDim,
+  },
   radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
     borderColor: colors.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: {
+  radioActive: {
     borderColor: colors.accent,
   },
-  radioDot: {
-    width: 10,
-    height: 10,
+  dot: {
+    width: 9,
+    height: 9,
     borderRadius: 5,
     backgroundColor: colors.accent,
   },
   label: {
     color: colors.textSecondary,
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 22,
   },
-  labelSelected: {
-    color: colors.white,
+  labelActive: {
+    color: colors.textPrimary,
     fontWeight: '500',
   },
 });

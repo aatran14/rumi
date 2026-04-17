@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import type { StackScreenNavigation } from '../types';
-import { colors } from '../theme';
+import { colors, radius } from '../theme';
 
 type Props = { navigation: StackScreenNavigation };
 
@@ -10,17 +10,19 @@ export default function SplashScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      <View style={styles.titleWrap}>
-        <Text style={styles.title}>Rumi</Text>
-        <View style={styles.glow} />
+
+      <View style={styles.center}>
+        <Text style={styles.wordmark}>Rumi</Text>
+        <Text style={styles.tagline}>Home. Together.</Text>
       </View>
+
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.replace('Login')}
-        accessibilityLabel="Check in to Rumi"
-        activeOpacity={0.8}
+        accessibilityLabel="Get started with Rumi"
+        activeOpacity={0.85}
       >
-        <Text style={styles.buttonText}>Check-In</Text>
+        <Text style={styles.buttonText}>Get started</Text>
       </TouchableOpacity>
     </View>
   );
@@ -32,45 +34,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 32,
   },
-  titleWrap: {
+  center: {
     alignItems: 'center',
-    marginBottom: 80,
+    flex: 1,
+    justifyContent: 'center',
   },
-  title: {
+  wordmark: {
     fontSize: 80,
-    color: colors.white,
+    color: colors.textPrimary,
     fontStyle: 'italic',
     fontFamily: 'serif',
     letterSpacing: 2,
+    marginBottom: 12,
   },
-  glow: {
-    position: 'absolute',
-    top: 20,
-    width: 200,
-    height: 60,
-    borderRadius: 100,
-    backgroundColor: colors.accent,
-    opacity: 0.12,
-    transform: [{ scaleX: 2 }],
+  tagline: {
+    fontSize: 16,
+    color: colors.textMuted,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
   button: {
+    width: '100%',
     backgroundColor: colors.accent,
-    paddingHorizontal: 64,
-    paddingVertical: 18,
-    borderRadius: 32,
-    position: 'absolute',
-    bottom: 100,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 8,
+    borderRadius: radius.pill,
+    paddingVertical: 17,
+    alignItems: 'center',
+    marginBottom: 48,
   },
   buttonText: {
-    color: colors.white,
-    fontSize: 22,
+    color: colors.textPrimary,
+    fontSize: 17,
     fontWeight: '600',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
 });

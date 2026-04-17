@@ -7,102 +7,129 @@ import RadioGroup from '../components/RadioGroup';
 
 type Props = { navigation: StackScreenNavigation };
 
-function ToggleRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+function ToggleRow({ label, sub, value, onChange }: {
+  label: string; sub?: string; value: boolean; onChange: (v: boolean) => void;
 }) {
   return (
     <View style={styles.toggleRow}>
-      <Text style={styles.toggleLabel}>{label}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.toggleLabel}>{label}</Text>
+        {sub && <Text style={styles.toggleSub}>{sub}</Text>}
+      </View>
       <Switch
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: 'rgba(255,255,255,0.1)', true: colors.green }}
-        thumbColor={colors.white}
+        trackColor={{ false: colors.surfaceHover, true: colors.success }}
+        thumbColor={colors.textPrimary}
       />
     </View>
   );
 }
 
 export default function NotificationsScreen({ navigation }: Props) {
-  const [choreReminder, setChoreReminder] = useState('48h');
-  const [updatesEnabled, setUpdatesEnabled] = useState(true);
-  const [updatesFilter, setUpdatesFilter] = useState('important');
+  const [choreReminder,   setChoreReminder]   = useState('48h');
+  const [updatesEnabled,  setUpdatesEnabled]  = useState(true);
+  const [updatesFilter,   setUpdatesFilter]   = useState('important');
   const [calendarUpdates, setCalendarUpdates] = useState(true);
-  const [locationShare, setLocationShare] = useState(true);
-  const [roommateStatus, setRoommateStatus] = useState(true);
+  const [locationShare,   setLocationShare]   = useState(true);
+  const [roommateStatus,  setRoommateStatus]  = useState(true);
 
   return (
     <View style={styles.container}>
       <ScreenHeader title="Notifications" onBack={() => navigation.goBack()} />
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Chore Reminders */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Chore Reminders</Text>
+        <SectionCard title="Chore reminders">
           <RadioGroup
             options={[
               { label: '24 hours before due', value: '24h' },
               { label: '48 hours before due', value: '48h' },
-              { label: 'Custom', value: 'custom' },
+              { label: 'Custom',              value: 'custom' },
             ]}
             selected={choreReminder}
             onSelect={setChoreReminder}
           />
-        </View>
+        </SectionCard>
 
-        {/* Updates */}
-        <View style={styles.section}>
-          <ToggleRow label="Updates" value={updatesEnabled} onChange={setUpdatesEnabled} />
+        <SectionCard title="Fridge updates">
+          <ToggleRow
+            label="Push notifications"
+            sub="Get notified when roommates post"
+            value={updatesEnabled}
+            onChange={setUpdatesEnabled}
+          />
           {updatesEnabled && (
-            <RadioGroup
-              options={[
-                { label: 'All', value: 'all' },
-                { label: 'Only Important Flagged', value: 'important' },
-                { label: 'Custom', value: 'custom' },
-              ]}
-              selected={updatesFilter}
-              onSelect={setUpdatesFilter}
-            />
+            <View style={styles.subSection}>
+              <RadioGroup
+                options={[
+                  { label: 'All notes',             value: 'all' },
+                  { label: 'Important only',         value: 'important' },
+                  { label: 'Custom',                 value: 'custom' },
+                ]}
+                selected={updatesFilter}
+                onSelect={setUpdatesFilter}
+              />
+            </View>
           )}
-        </View>
+        </SectionCard>
 
-        {/* Toggles */}
-        <View style={styles.section}>
-          <ToggleRow label="Calendar Updates" value={calendarUpdates} onChange={setCalendarUpdates} />
-          <ToggleRow label="Enable Location Share" value={locationShare} onChange={setLocationShare} />
-          <ToggleRow label="Roommate Status Change" value={roommateStatus} onChange={setRoommateStatus} />
-        </View>
+        <SectionCard title="Other">
+          <ToggleRow
+            label="Calendar updates"
+            sub="New or changed household events"
+            value={calendarUpdates}
+            onChange={setCalendarUpdates}
+          />
+          <View style={styles.rowDivider} />
+          <ToggleRow
+            label="Location sharing"
+            sub="Let roommates see when you're home"
+            value={locationShare}
+            onChange={setLocationShare}
+          />
+          <View style={styles.rowDivider} />
+          <ToggleRow
+            label="Roomie status changes"
+            sub="Home / Away updates"
+            value={roommateStatus}
+            onChange={setRoommateStatus}
+          />
+        </SectionCard>
+
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 64,
-  },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 56 },
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: 100,
     gap: spacing.md,
   },
-  section: {
+  card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
     padding: spacing.md,
   },
-  sectionTitle: {
-    fontSize: 17,
+  cardTitle: {
+    fontSize: 13,
     fontWeight: '600',
-    color: colors.white,
+    color: colors.textMuted,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
     marginBottom: spacing.sm,
   },
   toggleRow: {
@@ -110,11 +137,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
+    gap: 12,
   },
   toggleLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
     color: colors.textPrimary,
-    flex: 1,
+    lineHeight: 20,
+  },
+  toggleSub: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 1,
+    lineHeight: 16,
+  },
+  rowDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginHorizontal: -spacing.sm,
+  },
+  subSection: {
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
 });

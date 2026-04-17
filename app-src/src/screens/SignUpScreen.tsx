@@ -1,14 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Alert,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { StatusBar } from 'expo-status-bar';
@@ -22,27 +15,21 @@ type Mode = 'create' | 'join';
 
 const CODE_LENGTH = 5;
 
-function generateCode(): string {
+function generateCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < CODE_LENGTH; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+  return Array.from({ length: CODE_LENGTH }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 export default function SignUpScreen({ navigation }: Props) {
   const { signUp } = useAuth();
-  const [mode, setMode] = useState<Mode>('create');
-  const [displayName, setDisplayName] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [mode,            setMode]            = useState<Mode>('create');
+  const [displayName,     setDisplayName]     = useState('');
+  const [username,        setUsername]        = useState('');
+  const [password,        setPassword]        = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error,           setError]           = useState('');
 
-  // Create Home: generated code
   const homeCode = useMemo(() => generateCode(), []);
-
-  // Join a Home: code input
   const [joinCode, setJoinCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const codeInputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -51,9 +38,7 @@ export default function SignUpScreen({ navigation }: Props) {
     const next = [...joinCode];
     next[index] = upper.slice(-1);
     setJoinCode(next);
-    if (upper && index < CODE_LENGTH - 1) {
-      codeInputRefs.current[index + 1]?.focus();
-    }
+    if (upper && index < CODE_LENGTH - 1) codeInputRefs.current[index + 1]?.focus();
   };
 
   const handleCodeKeyPress = (key: string, index: number) => {
@@ -69,7 +54,11 @@ export default function SignUpScreen({ navigation }: Props) {
 
   const handleCreateAccount = () => {
     if (password !== confirmPassword) {
-      Alert.alert('Passwords do not match');
+      setError('Passwords do not match.');
+      return;
+    }
+    if (!displayName.trim() || !username.trim()) {
+      setError('Please fill in all fields.');
       return;
     }
     signUp(username, displayName);
@@ -82,149 +71,106 @@ export default function SignUpScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar style="light" />
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Text style={styles.title}>Rumi</Text>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+
+        <Text style={styles.wordmark}>Rumi</Text>
+        <Text style={styles.subtitle}>Create your account</Text>
 
         {/* Fields */}
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>Display{'\n'}Name</Text>
-          <TextInput
-            style={styles.input}
-            value={displayName}
-            onChangeText={setDisplayName}
-            autoCorrect={false}
-            placeholderTextColor={colors.textMuted}
-          />
-        </View>
+        {[
+          { label: 'Display name', value: displayName, onChange: setDisplayName, placeholder: 'How roommates see you' },
+          { label: 'Username',     value: username,    onChange: setUsername,    placeholder: 'lowercase, no spaces', auto: 'none' as const },
+          { label: 'Password',     value: password,    onChange: setPassword,    placeholder: '••••••••', secure: true },
+          { label: 'Confirm password', value: confirmPassword, onChange: setConfirmPassword, placeholder: '••••••••', secure: true },
+        ].map((f) => (
+          <View key={f.label} style={styles.field}>
+            <Text style={styles.label}>{f.label}</Text>
+            <TextInput
+              style={styles.input}
+              value={f.value}
+              onChangeText={(t) => { f.onChange(t); setError(''); }}
+              autoCapitalize={f.auto ?? 'words'}
+              autoCorrect={false}
+              secureTextEntry={f.secure}
+              placeholder={f.placeholder}
+              placeholderTextColor={colors.textMuted}
+            />
+          </View>
+        ))}
 
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholderTextColor={colors.textMuted}
-          />
-        </View>
-
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor={colors.textMuted}
-          />
-        </View>
-
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>Reenter{'\n'}Password</Text>
-          <TextInput
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            placeholderTextColor={colors.textMuted}
-          />
-        </View>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {/* Mode toggle */}
-        <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.toggleButton, mode === 'create' && styles.toggleActive]}
-            onPress={() => setMode('create')}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                mode === 'create' && styles.toggleTextActive,
-              ]}
+        <View style={styles.modeToggle}>
+          {(['create', 'join'] as const).map((m) => (
+            <TouchableOpacity
+              key={m}
+              style={[styles.modeBtn, mode === m && styles.modeBtnActive]}
+              onPress={() => setMode(m)}
+              activeOpacity={0.8}
             >
-              Create Home
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleButton, mode === 'join' && styles.toggleActive]}
-            onPress={() => setMode('join')}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                mode === 'join' && styles.toggleTextActive,
-              ]}
-            >
-              Join a Home
-            </Text>
-          </TouchableOpacity>
+              <Text style={[styles.modeBtnText, mode === m && styles.modeBtnTextActive]}>
+                {m === 'create' ? 'Create home' : 'Join a home'}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Code section */}
-        {mode === 'create' ? (
-          <View style={styles.codeSection}>
-            <View style={styles.codeRow}>
-              {homeCode.split('').map((char, i) => (
-                <View key={i} style={styles.codeBox}>
-                  <Text style={styles.codeChar}>{char}</Text>
-                </View>
-              ))}
-              <TouchableOpacity onPress={handleCopyCode} style={styles.copyButton}>
-                <Ionicons name="copy-outline" size={20} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.codeHint}>
-              Copy this code and share with{'\n'}your roommates
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.codeSection}>
-            <View style={styles.codeRow}>
-              {joinCode.map((char, i) => (
-                <TextInput
-                  key={i}
-                  ref={(ref) => { codeInputRefs.current[i] = ref; }}
-                  style={styles.codeInput}
-                  value={char}
-                  onChangeText={(t) => handleCodeChange(t, i)}
-                  onKeyPress={({ nativeEvent }) =>
-                    handleCodeKeyPress(nativeEvent.key, i)
-                  }
-                  maxLength={1}
-                  autoCapitalize="characters"
-                  keyboardType="default"
-                  textAlign="center"
-                />
-              ))}
-            </View>
-            <Text style={styles.codeHint}>
-              Enter the code shared by your{'\n'}roommate
-            </Text>
-          </View>
-        )}
+        <View style={styles.codeSection}>
+          {mode === 'create' ? (
+            <>
+              <View style={styles.codeRow}>
+                {homeCode.split('').map((char, i) => (
+                  <View key={i} style={styles.codeBox}>
+                    <Text style={styles.codeChar}>{char}</Text>
+                  </View>
+                ))}
+                <TouchableOpacity onPress={handleCopyCode} style={styles.copyBtn}>
+                  <Ionicons name="copy-outline" size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.codeHint}>Share this code with your roommates</Text>
+            </>
+          ) : (
+            <>
+              <View style={styles.codeRow}>
+                {joinCode.map((char, i) => (
+                  <TextInput
+                    key={i}
+                    ref={(ref) => { codeInputRefs.current[i] = ref; }}
+                    style={styles.codeInput}
+                    value={char}
+                    onChangeText={(t) => handleCodeChange(t, i)}
+                    onKeyPress={({ nativeEvent }) => handleCodeKeyPress(nativeEvent.key, i)}
+                    maxLength={1}
+                    autoCapitalize="characters"
+                    keyboardType="default"
+                    textAlign="center"
+                  />
+                ))}
+              </View>
+              <Text style={styles.codeHint}>Enter the code shared by your roommate</Text>
+            </>
+          )}
+        </View>
 
-        {/* Create Account */}
         <TouchableOpacity
-          style={styles.primaryButton}
+          style={styles.primaryBtn}
           onPress={handleCreateAccount}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <Text style={styles.primaryButtonText}>Create Account</Text>
+          <Text style={styles.primaryBtnText}>Create account</Text>
         </TouchableOpacity>
 
-        {/* Link to Sign In */}
         <TouchableOpacity
           onPress={() => navigation.navigate('Login')}
-          style={styles.linkWrap}
+          style={styles.footer}
+          activeOpacity={0.7}
         >
-          <Text style={styles.linkText}>
-            Already have an account? <Text style={styles.linkBold}>Sign in</Text>
+          <Text style={styles.footerText}>
+            Already have an account?{' '}
+            <Text style={styles.footerLink}>Sign in</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -233,76 +179,68 @@ export default function SignUpScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xxl,
   },
-  title: {
-    fontSize: 72,
-    color: colors.white,
+
+  wordmark: {
+    fontSize: 56,
+    color: colors.textPrimary,
     fontStyle: 'italic',
     fontFamily: 'serif',
     letterSpacing: 2,
     textAlign: 'center',
-    marginBottom: 40,
-  },
-  fieldRow: {
-    marginBottom: spacing.lg,
-  },
-  label: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
     marginBottom: 6,
   },
+  subtitle: {
+    fontSize: 15,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+
+  // Fields
+  field: { gap: 6, marginBottom: spacing.md },
+  label: { fontSize: 13, fontWeight: '500', color: colors.textSecondary, marginLeft: 2 },
   input: {
-    flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
-    color: colors.white,
+    color: colors.textPrimary,
     fontSize: 16,
   },
+  errorText: { color: colors.danger, fontSize: 13, marginBottom: spacing.sm, marginLeft: 2 },
 
-  // Toggle
-  toggleRow: {
+  // Mode toggle
+  modeToggle: {
     flexDirection: 'row',
-    alignSelf: 'center',
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: colors.textMuted,
-    overflow: 'hidden',
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: 3,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
   },
-  toggleButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+  modeBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: radius.sm,
+    alignItems: 'center',
   },
-  toggleActive: {
-    backgroundColor: colors.accent,
-  },
-  toggleText: {
-    color: colors.textSecondary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  toggleTextActive: {
-    color: colors.white,
-  },
+  modeBtnActive: { backgroundColor: colors.accent },
+  modeBtnText: { color: colors.textMuted, fontSize: 14, fontWeight: '500' },
+  modeBtnTextActive: { color: colors.textPrimary, fontWeight: '600' },
 
   // Code
-  codeSection: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
+  codeSection: { alignItems: 'center', marginBottom: spacing.lg },
   codeRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -310,69 +248,45 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   codeBox: {
-    width: 44,
-    height: 52,
+    width: 44, height: 52,
     backgroundColor: colors.surface,
     borderRadius: radius.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  codeChar: {
-    color: colors.white,
-    fontSize: 28,
-    fontWeight: '700',
-  },
+  codeChar: { color: colors.textPrimary, fontSize: 24, fontWeight: '700' },
   codeInput: {
-    width: 44,
-    height: 52,
+    width: 44, height: 52,
     backgroundColor: colors.surface,
     borderRadius: radius.sm,
-    color: colors.white,
-    fontSize: 28,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+    color: colors.textPrimary,
+    fontSize: 24,
     fontWeight: '700',
     textAlign: 'center',
   },
-  copyButton: {
-    marginLeft: 4,
-    padding: 6,
-  },
+  copyBtn: { marginLeft: 4, padding: 6 },
   codeHint: {
-    color: colors.textSecondary,
-    fontSize: 14,
+    color: colors.textMuted,
+    fontSize: 13,
     textAlign: 'center',
-    marginTop: spacing.sm,
-    lineHeight: 20,
+    lineHeight: 19,
   },
 
   // Primary button
-  primaryButton: {
-    backgroundColor: colors.accentLight,
-    borderRadius: 28,
+  primaryBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.pill,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: spacing.md,
-    marginHorizontal: spacing.lg,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 6,
+    marginTop: spacing.sm,
   },
-  primaryButtonText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  linkWrap: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-  },
-  linkText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  linkBold: {
-    color: colors.accentLight,
-    fontWeight: '600',
-  },
+  primaryBtnText: { color: colors.textPrimary, fontSize: 16, fontWeight: '600' },
+
+  footer: { alignItems: 'center', paddingVertical: spacing.md },
+  footerText: { color: colors.textMuted, fontSize: 14 },
+  footerLink: { color: colors.accentSoft, fontWeight: '500' },
 });
