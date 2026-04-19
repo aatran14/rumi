@@ -30,6 +30,7 @@ const DEMO_USERS: Record<string, User> = {
   gaya:   { username: 'gaya',   displayName: 'Gaya',   color: '#4ECDC4' },
   adriel: { username: 'adriel', displayName: 'Adriel', color: '#FFD93D' },
   andy:   { username: 'andy',   displayName: 'Andy',   color: '#A29BFE' },
+  guest:  { username: 'guest',  displayName: 'Guest',  color: '#6C63FF' },
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

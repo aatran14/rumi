@@ -15,6 +15,7 @@ const USERS: Record<string, string> = {
   gaya: 'password',
   adriel: 'password',
   andy: 'password',
+  guest: 'password',
 };
 
 export default function LoginScreen({ navigation }: Props) {

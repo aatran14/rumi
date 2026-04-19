@@ -21,6 +21,9 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
-    "web": { "favicon": "./assets/favicon.png" }
+    "web": { "favicon": "./assets/favicon.png" },
+    "experiments": {
+      "baseUrl": "/rumi"
+    }
   }
 }
