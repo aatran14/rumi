@@ -14,7 +14,6 @@ const USERS: Record<string, string> = {
   daniel: 'password',
   gaya: 'password',
   adriel: 'password',
-  andy: 'password',
   guest: 'password',
 };
 

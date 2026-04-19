@@ -29,7 +29,6 @@ const DEMO_USERS: Record<string, User> = {
   daniel: { username: 'daniel', displayName: 'Daniel', color: '#A29BFE' },
   gaya:   { username: 'gaya',   displayName: 'Gaya',   color: '#4ECDC4' },
   adriel: { username: 'adriel', displayName: 'Adriel', color: '#FF9F43' },
-  andy:   { username: 'andy',   displayName: 'Andy',   color: '#FFD93D' },
   guest:  { username: 'guest',  displayName: 'Guest',  color: '#6C63FF' },
 };
 
