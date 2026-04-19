@@ -22,8 +22,8 @@ export const SAMPLE_EVENTS: CalendarEvent[] = [
     endDate: 'Wed, April 22, 2026',
     endTime: '',
     repeats: true,
-    notes: 'Venmo Daniel — he pays the landlord.',
-    createdBy: 'Daniel',
+    notes: 'Venmo Andy — he pays the landlord.',
+    createdBy: 'Andy',
   },
   {
     id: '3',
