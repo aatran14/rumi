@@ -11,7 +11,7 @@ export const SAMPLE_EVENTS: CalendarEvent[] = [
     endTime: '8:00 PM',
     repeats: true,
     notes: 'Weekly check-in. Chores, bills, anything weird.',
-    createdBy: 'Andy',
+    createdBy: 'Daniel',
   },
   {
     id: '2',
@@ -22,8 +22,8 @@ export const SAMPLE_EVENTS: CalendarEvent[] = [
     endDate: 'Wed, April 22, 2026',
     endTime: '',
     repeats: true,
-    notes: 'Venmo Andy — he pays the landlord.',
-    createdBy: 'Andy',
+    notes: 'Venmo Daniel — he pays the landlord.',
+    createdBy: 'Daniel',
   },
   {
     id: '3',
@@ -59,6 +59,6 @@ export const SAMPLE_EVENTS: CalendarEvent[] = [
     endTime: '1:00 PM',
     repeats: false,
     notes: 'Splitting the cart. Add things to the list.',
-    createdBy: 'Andy',
+    createdBy: 'Daniel',
   },
 ];
