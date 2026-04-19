@@ -7,7 +7,7 @@ import { useSyncContext } from '../contexts/SyncContext';
 
 export default function ProfileScreen() {
   const { user, setUserColor, availableColors } = useAuth();
-  const { tasks, events, roommates } = useSyncContext();
+  const { tasks, events, roommates, setRoommates } = useSyncContext();
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   const userColor   = user?.color ?? colors.accent;
@@ -15,6 +15,21 @@ export default function ProfileScreen() {
   const activeTasks = tasks.filter((t) => !t.done).length;
 
   const initial = user?.displayName?.[0]?.toUpperCase() ?? '?';
+
+  const takenColors = new Set(
+    roommates.filter((r) => r.name !== user?.displayName).map((r) => r.bubbleColor),
+  );
+
+  const changeColor = (c: string) => {
+    setUserColor(c);
+    if (user) {
+      setRoommates(
+        roommates.map((r) =>
+          r.name === user.displayName ? { ...r, bubbleColor: c } : r,
+        ),
+      );
+    }
+  };
 
   return (
     <ScrollView
@@ -75,19 +90,25 @@ export default function ProfileScreen() {
 
         {showColorPicker && (
           <View style={styles.colorGrid}>
-            {availableColors.map((c) => (
-              <TouchableOpacity
-                key={c}
-                onPress={() => setUserColor(c)}
-                activeOpacity={0.7}
-              >
-                <View style={[
-                  styles.colorOption,
-                  { backgroundColor: c },
-                  c === userColor && styles.colorOptionSelected,
-                ]} />
-              </TouchableOpacity>
-            ))}
+            {availableColors.map((c) => {
+              const taken = takenColors.has(c) && c !== userColor;
+              return (
+                <TouchableOpacity
+                  key={c}
+                  onPress={() => !taken && changeColor(c)}
+                  activeOpacity={taken ? 1 : 0.7}
+                >
+                  <View style={[
+                    styles.colorOption,
+                    { backgroundColor: c },
+                    taken && styles.colorOptionTaken,
+                    c === userColor && styles.colorOptionSelected,
+                  ]}>
+                    {taken && <Ionicons name="close" size={14} color="#00000088" />}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </View>
@@ -221,9 +242,14 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   colorOptionSelected: {
     borderWidth: 3,
     borderColor: colors.textPrimary,
+  },
+  colorOptionTaken: {
+    opacity: 0.35,
   },
 });
