@@ -221,10 +221,11 @@ export default function UpdatesScreen() {
           {items.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={[styles.listCard, item.important && styles.listCardImportant]}
+              style={styles.listCard}
               onPress={() => setSelectedItem(item)}
               activeOpacity={0.8}
             >
+              {item.important && <View style={styles.importantStripe} />}
               {item.important && (
                 <View style={styles.importantPill}>
                   <Text style={styles.importantPillText}>Important</Text>
@@ -429,16 +430,23 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   listCard: {
+    position: 'relative',
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     padding: spacing.md,
+    paddingLeft: spacing.md + 8,
     gap: 8,
   },
-  listCardImportant: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.danger,
+  importantStripe: {
+    position: 'absolute',
+    left: 8,
+    top: 12,
+    bottom: 12,
+    width: 3,
+    borderRadius: 2,
+    backgroundColor: colors.danger,
   },
   listCardText: { color: colors.textPrimary, fontSize: 15, lineHeight: 22 },
   listCardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
