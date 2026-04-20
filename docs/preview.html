@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rumi — Phone preview</title>
+<style>
+  :root {
+    --bg: #0A0820;
+    --panel: #151030;
+    --text: #E8E6F5;
+    --muted: #8b87a8;
+    --accent: #6C63FF;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 220px;
+  }
+  .controls h1 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    letter-spacing: .3px;
+  }
+  .controls p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .row { display: flex; gap: 8px; align-items: center; }
+  label { font-size: 12px; color: var(--muted); }
+  input[type="text"] {
+    flex: 1;
+    padding: 8px 10px;
+    background: var(--panel);
+    border: 1px solid #2a234a;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  button, select {
+    padding: 8px 12px;
+    background: var(--panel);
+    border: 1px solid #2a234a;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Phone frame */
+  .phone {
+    --w: 390px;
+    --h: 844px;
+    width: calc(var(--w) + 24px);
+    height: calc(var(--h) + 24px);
+    border-radius: 52px;
+    background: #1a1530;
+    padding: 12px;
+    box-shadow:
+      0 0 0 2px #2a234a,
+      0 30px 60px rgba(0,0,0,.45),
+      inset 0 0 0 6px #0f0a22;
+    position: relative;
+  }
+  .notch {
+    position: absolute;
+    top: 18px; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 28px;
+    background: #000;
+    border-radius: 16px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .screen {
+    width: 100%; height: 100%;
+    border-radius: 40px;
+    overflow: hidden;
+    background: #000;
+  }
+  iframe {
+    width: 100%; height: 100%;
+    border: 0;
+    display: block;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="controls">
+    <h1>Rumi · phone preview</h1>
+    <p>Live view of the web build in a phone-shaped frame. Edit the room to load a different sandbox.</p>
+
+    <label>Room</label>
+    <div class="row">
+      <input id="room" type="text" value="demo1" />
+      <button class="primary" id="go">Load</button>
+    </div>
+
+    <label>Size</label>
+    <select id="size">
+      <option value="390x844">iPhone 14 (390 × 844)</option>
+      <option value="375x812">iPhone 11/12 mini (375 × 812)</option>
+      <option value="430x932">iPhone 14 Pro Max (430 × 932)</option>
+      <option value="360x780">Android (360 × 780)</option>
+      <option value="414x896">iPhone 11 (414 × 896)</option>
+    </select>
+
+    <button id="reload">Reload frame</button>
+
+    <p style="margin-top:12px">
+      Tip: change the room value + hit Load to simulate different interviewees. State lives in the iframe's localStorage.
+    </p>
+  </div>
+
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <iframe id="frame" src=""></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+  const frame = document.getElementById('frame');
+  const roomInput = document.getElementById('room');
+  const goBtn = document.getElementById('go');
+  const sizeSel = document.getElementById('size');
+  const reloadBtn = document.getElementById('reload');
+  const phone = document.getElementById('phone');
+
+  function load() {
+    const room = encodeURIComponent(roomInput.value.trim() || 'default');
+    frame.src = `./index.html?room=${room}`;
+  }
+  function resize() {
+    const [w, h] = sizeSel.value.split('x').map(Number);
+    phone.style.setProperty('--w', w + 'px');
+    phone.style.setProperty('--h', h + 'px');
+  }
+  goBtn.addEventListener('click', load);
+  roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+  sizeSel.addEventListener('change', resize);
+  reloadBtn.addEventListener('click', () => frame.contentWindow.location.reload());
+  resize();
+  load();
+</script>
+</body>
+</html>
