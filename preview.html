@@ -121,6 +121,11 @@
     <h1>Rumi · phone preview</h1>
     <p>Live view of the web build in a phone-shaped frame. Edit the room to load a different sandbox.</p>
 
+    <label>Base URL</label>
+    <div class="row">
+      <input id="base" type="text" value="http://localhost:8081/rumi/" />
+    </div>
+
     <label>Room</label>
     <div class="row">
       <input id="room" type="text" value="demo1" />
@@ -153,6 +158,7 @@
 
 <script>
   const frame = document.getElementById('frame');
+  const baseInput = document.getElementById('base');
   const roomInput = document.getElementById('room');
   const goBtn = document.getElementById('go');
   const sizeSel = document.getElementById('size');
@@ -160,8 +166,9 @@
   const phone = document.getElementById('phone');
 
   function load() {
+    const base = (baseInput.value.trim() || 'http://localhost:8081/rumi/').replace(/\/?$/, '/');
     const room = encodeURIComponent(roomInput.value.trim() || 'default');
-    frame.src = `./index.html?room=${room}`;
+    frame.src = `${base}?room=${room}`;
   }
   function resize() {
     const [w, h] = sizeSel.value.split('x').map(Number);
@@ -170,6 +177,7 @@
   }
   goBtn.addEventListener('click', load);
   roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+  baseInput.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
   sizeSel.addEventListener('change', resize);
   reloadBtn.addEventListener('click', () => frame.contentWindow.location.reload());
   resize();
